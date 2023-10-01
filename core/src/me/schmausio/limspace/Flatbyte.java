@@ -273,7 +273,6 @@ public class Flatbyte implements Json.Serializable
 			json.writeValue(values[i]);
 		}
 		json.writeArrayEnd();
-
 	}
 
 	@Override

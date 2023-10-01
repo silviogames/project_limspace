@@ -12,7 +12,10 @@ public enum Res
    //SHEET_FLOOR_TILES(3, 16, 16),
 
    ERROR_FRAME(),
-   PIXEL(),
+
+   BLOCK(Tile.values().length, 16,16),
+
+   CAT(),
    //BOX(),
    //BLOCK1(Tile.values().length, 16, 16),
    //PIG(10, 32, 26),
@@ -26,8 +29,8 @@ public enum Res
    //PARTICLE_MUSHROOM(),
    ;
 
-   static final Array<Anim> load_queue = new Array<Anim>();
-   public static Array<TextureRegion> animation_frames = new Array<TextureRegion>(); // contains all frames of all animations
+   static final Array<Anim> load_queue = new Array<>();
+   public static Array<TextureRegion> animation_frames = new Array<>(); // contains all frames of all animations
    public static IntIntMap anim_to_frame = new IntIntMap(); // points from anim id to start of frame in animation_frames
    static TextureAtlas atlas;
    public static TextureRegion alphabet, pixel;
@@ -57,6 +60,9 @@ public enum Res
       for (Res r : values())
       {
          r.region = atlas.findRegion(r.name().toLowerCase());
+         if(r.region == null){
+            System.out.println("RES: could not find "+ r);
+         }
 
          if (r.sheet_num > 0)
          {

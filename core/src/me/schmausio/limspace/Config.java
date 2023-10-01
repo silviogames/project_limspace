@@ -3,6 +3,8 @@ package me.schmausio.limspace;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
+import jdk.internal.event.SecurityPropertyModificationEvent;
+
 public class Config
 {
    public static void load_config(boolean verbose)
@@ -14,6 +16,7 @@ public class Config
       int assigned_values = 0;
 
       FileHandle file = Gdx.files.internal("config.txt");
+      if(!file.exists()) return;
       String[] lines = file.readString().split("\n");
       for (String line : lines)
       {
@@ -75,6 +78,15 @@ public class Config
       WALK_SPEED_PARTICLE_FLOWER,
       UP_SPEED_PARTICLE_FLOWER,
       PIG_HIT_RADIUS,
+      WALL_SPEED,
+      PLAYER_SPAWN_TILEX,
+      PLAYER_SPAWN_TILEY,
+
+      EDITOR_MOVE_SPEED,
+      EDITOR_TILE_OFFX,
+      EDITOR_TILE_OFFY,
+      EDITOR_TILE_SPACING,
+
       ;
 
       // IF THE FILE DOES NOT SET THE VALUE A DEFAULT OF 10 MAY BE WEIRD FOR SOME OF THE CONFIGS

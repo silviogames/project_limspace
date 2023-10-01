@@ -20,6 +20,8 @@ public class RenderUtil
 
    public final static Color collect_box_shadow = Color.DARK_GRAY.cpy();
 
+   public final static Color color_edit_tile = Color.SCARLET.cpy();
+
    static
    {
       color_trans_gray.a = 0.5f;

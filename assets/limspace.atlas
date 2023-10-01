@@ -2,4 +2,10 @@ limspace.png
 size:256,128
 repeat:none
 5x6font
-bounds:2,2,128,64
+bounds:2,44,128,64
+block
+bounds:2,26,67,16
+cat
+bounds:132,78,30,30
+error_frame
+bounds:2,2,16,22

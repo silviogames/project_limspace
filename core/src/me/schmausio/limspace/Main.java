@@ -2,7 +2,6 @@ package me.schmausio.limspace;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -14,15 +13,19 @@ public class Main extends ApplicationAdapter
   public static SpriteBatch batch;
 
   OrthographicCamera camera;
-  Viewport viewport;
+  public static Viewport viewport;
 
   public static Smartrix smx_text_data = new Smartrix(100, -1, -1);
 
   public final static int SCREEN_WIDTH = 400, SCREEN_HEIGHT = 300;
 
+	public static final boolean DEBUG = true;
+
   @Override
   public void create()
   {
+		// TESTING
+
 		camera = new OrthographicCamera();
 		viewport = new FitViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
 
@@ -30,10 +33,11 @@ public class Main extends ApplicationAdapter
 		Res.load();
 
 		Text.init();
-		//Tile.init_colors();
 
-		// TODO: 30.09.23 load other configs 
-		//Config.load_config(false);
+		Config.load_config(true);
+
+		World.level_name = "test";
+		World.init_status(World.WorldStatus.LOAD_LEVEL);
   }
 
 	@Override
@@ -51,8 +55,7 @@ public class Main extends ApplicationAdapter
 
 		batch.begin();
 
-		// TODO: 30.09.23 add world 
-		//World.render();
+		World.render();
 
 		// for now no sorting of the text entries happens, since it is not needed in this project
 		for (int i = 0; i < smx_text_data.num_lines(); i++)
@@ -74,13 +77,16 @@ public class Main extends ApplicationAdapter
 
 	private void update(float delta)
 	{
-		// TODO: 30.09.23 update world 
-		//World.update(delta);
+		World.update(delta);
 	}
 
 	@Override
 	public void dispose()
 	{
+		if(Main.DEBUG)
+		{
+			World.save_chunks();
+		}
 		batch.dispose();
 		Res.dispose();
 		Text.dispose();
