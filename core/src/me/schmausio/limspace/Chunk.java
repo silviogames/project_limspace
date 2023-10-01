@@ -115,10 +115,10 @@ public class Chunk implements Json.Serializable
 
         // TODO: 01.10.23 at some points the walls are other tiles than the floor
         Main.batch.setColor(0.4f,0.4f,0.4f, 1f);
-        Main.batch.draw(Res.BLOCK.sheet[walls.get(ix, iy)], px, py);
+        Main.batch.draw(Res.PLATFORM.sheet[walls.get(ix, iy)], px, py);
 
         Main.batch.setColor(Color.WHITE);
-        Main.batch.draw(Res.BLOCK.sheet[tiles.get(ix, iy)], px, py);
+        Main.batch.draw(Res.PLATFORM.sheet[tiles.get(ix, iy)], px, py);
 
         if (World.status == World.WorldStatus.EDIT_CHUNKS)
         {

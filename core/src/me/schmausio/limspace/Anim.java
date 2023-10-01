@@ -5,6 +5,23 @@ public enum Anim
    // SIMPLE ANIMATION SYSTEM
 
    DUMMY(2, 1f, -1, false, 0, 1),
+
+   CAT_IDLE_LEFT(2, 0.2f, -1, false, 0,1),
+   CAT_IDLE_RIGHT(2, 0.2f, -1, false, 0,1),
+   CAT_RUN_LEFT(2, 0.08f, -1, false, 0,1),
+   CAT_RUN_RIGHT(2, 0.08f, -1, false, 0,1),
+   CAT_FALL_LEFT(2, 0.2f, -1, false, 0,1),
+   CAT_FALL_RIGHT(2, 0.2f, -1, false, 0,1),
+   CAT_SCHLECK_LEFT(2, 0.2f, -1, false, 0,1),
+   CAT_SCHLECK_RIGHT(2, 0.2f, -1, false, 0,1),
+   CAT_JUMP_LEFT(2, 0.2f, -1, false, 0,1),
+   CAT_JUMP_RIGHT(2, 0.2f, -1, false, 0,1),
+
+   STAR_STATIC(3, 0.1f, -1, false, 0, 1, 2),
+   STAR_DYNAMIC_1(2, 0.3f, -1, false, 0, 1),
+   STAR_DYNAMIC_2(3, 0.1f, -1, false, 0, 1, 2),
+   STAR_DYNAMIC_3(3, 0.15f, -1, false, 0, 1, 2),
+
    ;
    public static float[] returner = new float[3];
    public final int keyframe, num_frames; // number of individual frames, may appear more than once in anim

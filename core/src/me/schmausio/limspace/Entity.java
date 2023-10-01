@@ -13,8 +13,7 @@ public class Entity
   float posx, posy;
   float vx = 0, vy = 0;
 
-  public static boolean jump_hold = false;
-  public static float jump_hold_time = 0f;
+  public static boolean jumped = false;
 
   boolean falling = true;
   boolean coyote = false;
@@ -25,8 +24,7 @@ public class Entity
   Anim anim;
   float anim_time = 0f;
 
-  boolean flip = false;
-
+  boolean looking_right = false;
 
   // combined value of the chunk
   public int origin_chunk = -1;
@@ -79,7 +77,7 @@ public class Entity
         break;
     }
 
-    anim = type.anim_idle(this);
+    anim = type.anim_idle(this, vx > 0);
   }
 
   public void update(float delta, int index)
@@ -191,13 +189,13 @@ public class Entity
         {
           pressing_move = true;
           vx = -1;
-          flip = true;
+          looking_right = false;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D))
         {
           pressing_move = true;
           vx = 1;
-          flip = false;
+          looking_right = true;
         }
 
         if (!pressing_move && vx != 0)
@@ -210,34 +208,11 @@ public class Entity
         {
           if (!falling)
           {
+            jumped = true;
             falling = true;
             vy = Config.CONF.JUMP_STRENGTH.value;
           }
-
-          //if (!jump_hold && !falling)
-          //{
-          //   jump_hold = true;
-          //   falling = true;
-          //}
-          //if (jump_hold)
-          //{
-          //   jump_hold_time += delta;
-          //   if (jump_hold_time < 0.15f)
-          //   {
-          //      vy += Config.CONF.JUMP_STRENGTH.value * delta;
-          //   }
-          //}
-        } else
-        {
-          jump_hold_time = 0f;
-          jump_hold = false;
         }
-
-        //if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !falling)
-        //{
-        //   vy = Config.CONF.JUMP_STRENGTH.value;
-        //   falling = true;
-        //}
 
         if (!falling)
         {
@@ -258,16 +233,14 @@ public class Entity
         }
         if (Math.abs(vx) >= 0.05)
         {
-          anim = type.anim_run(this);
+          anim = type.anim_run(this, looking_right);
         } else
         {
-          anim = type.anim_idle(this);
+          anim = type.anim_idle(this, looking_right);
         }
         if (vy != 0)
         {
-          //anim = pack ? Anim.PIG_FALL_PACK : Anim.PIG_FALL;
-          // TODO: 30.09.23 set to fall anim
-          anim = Anim.DUMMY;
+          anim = type.anim_fall(this, looking_right,jumped && vy > -50);
         }
       }
       break;
@@ -387,6 +360,7 @@ public class Entity
           float interp_posy = MathUtils.lerp(posy, ny, i / ((float) (num_pixels_per_move - 1)));
           if (World.collision(posx, interp_posy, vy))
           {
+            jumped = false;
             falling = false;
             coyote_time = 0;
             coyote = false;
@@ -407,6 +381,7 @@ public class Entity
       {
         if (collision_vert)
         {
+          jumped = false;
           falling = false;
           coyote_time = 0;
           coyote = false;
@@ -459,7 +434,7 @@ public class Entity
       {
         boolean blink = time_blink > 0f && MathUtils.floor(time_blink / 0.07f) % 2 == 0;
         Main.batch.setColor(blink ? RenderUtil.color_blink : Color.WHITE);
-        TextureRegion reg = Res.get_frame(anim_time, anim, flip);
+        TextureRegion reg = Res.get_frame(anim_time, anim, false);
         Main.batch.draw(reg, px - reg.getRegionWidth() / 2f, py);
         Main.batch.setColor(Color.WHITE);
 
@@ -515,25 +490,44 @@ public class Entity
       return ret;
     }
 
-    public Anim anim_idle(Entity ent)
+    public Anim anim_idle(Entity ent, boolean right)
     {
       Anim ret = Anim.DUMMY;
       switch (this)
       {
         case PLAYER:
           // TODO: 30.09.23 fix
+          ret = right ? Anim.CAT_IDLE_RIGHT : Anim.CAT_IDLE_LEFT;
           break;
       }
       return ret;
     }
 
-    public Anim anim_run(Entity ent)
+    public Anim anim_fall(Entity ent, boolean right, boolean jump)
     {
       Anim ret = Anim.DUMMY;
       switch (this)
       {
         case PLAYER:
-          // TODO: 30.09.23 fix
+          if (jump)
+          {
+            ret = right ? Anim.CAT_JUMP_RIGHT : Anim.CAT_JUMP_LEFT;
+          } else
+          {
+            ret = right ? Anim.CAT_FALL_RIGHT : Anim.CAT_FALL_LEFT;
+          }
+          break;
+      }
+      return ret;
+    }
+
+    public Anim anim_run(Entity ent, boolean right)
+    {
+      Anim ret = Anim.DUMMY;
+      switch (this)
+      {
+        case PLAYER:
+          ret = right ? Anim.CAT_RUN_RIGHT : Anim.CAT_RUN_LEFT;
           break;
       }
       return ret;

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -23,6 +24,13 @@ public class World
   static IntSet visible_chunks_set = new IntSet();
   // index that increments every frame and checks all chunks for visibility
   static int chunk_check_index = 0;
+
+  static Smartrix sm_stars = new Smartrix(4, -1, -1);
+  // STARS:
+  // 0 -> star_type
+  // 1 -> x position
+  // 2 -> y position
+  // 3 -> anim time
 
   static int delete_chunk_index = -1;
   static int delete_chunk_counter = 0;
@@ -47,13 +55,6 @@ public class World
 
   public static String[] edit_layer_names = new String[4];
 
-  static
-  {
-    edit_layer_names[0] = "TILES";
-    edit_layer_names[1] = "OBJECTS";
-    edit_layer_names[2] = "DECO";
-    edit_layer_names[3] = "WALLS";
-  }
 
   public static int edit_tilex = 0, edit_tiley = 0;
   public static int edit_chunkx = 0, edit_chunky = 0;
@@ -83,10 +84,6 @@ public class World
 
   static Json json;
 
-  static
-  {
-    list_entities.add(player);
-  }
 
   static final int end_x = 2630, end_y = 4880;
 
@@ -100,6 +97,24 @@ public class World
 
   public static Color gameover_color_back = Color.BLACK.cpy();
   public static Color gameover_color_text = Color.BLACK.cpy();
+
+
+  public static Color debug_text_color = Color.LIGHT_GRAY.cpy();
+
+  static
+  {
+    edit_layer_names[0] = "TILES";
+    edit_layer_names[1] = "OBJECTS";
+    edit_layer_names[2] = "DECO";
+    edit_layer_names[3] = "WALLS";
+
+    list_entities.add(player);
+
+    for (int i = 0; i < 100; i++)
+    {
+      sm_stars.add_line(Star.random(), MathUtils.random(0, Main.SCREEN_WIDTH), MathUtils.random(-100, Main.SCREEN_HEIGHT + 100), MathUtils.random(0, 1000));
+    }
+  }
 
   public static void init_status(WorldStatus new_status)
   {
@@ -524,6 +539,11 @@ public class World
       {
         wall_progress += delta * (1 / (float) Config.CONF.WALL_SPEED.value);
 
+        for (int i = 0; i < sm_stars.num_lines(); i++)
+        {
+          sm_stars.set(i, 3,Star.update_star(sm_stars.get(i,3), sm_stars.get(i,0), delta));
+        }
+
         if (wall_progress >= 0.99f)
         {
           System.out.println("game over!");
@@ -601,7 +621,7 @@ public class World
 
     if (Main.DEBUG)
     {
-      Text.draw("mode " + status.toString(), 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+      Text.draw("mode " + status.toString(), 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
       debug_off += 10;
 
       Text.draw("" + Gdx.graphics.getFramesPerSecond(), Main.SCREEN_WIDTH - 20, Main.SCREEN_HEIGHT - 16, Color.OLIVE, 2f);
@@ -623,30 +643,30 @@ public class World
 
         if (Main.DEBUG)
         {
-          Text.draw("editor posx " + editor_x, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("editor posx " + editor_x, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
-          Text.draw("editor posy " + editor_y, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
-          debug_off += 10;
-
-          Text.draw("total chunks " + list_chunks.size, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("editor posy " + editor_y, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
 
-          Text.draw("visible chunks " + visible_chunks_set.size, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("total chunks " + list_chunks.size, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
 
-          Text.draw("mouse_x " + mouse_x, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
-          debug_off += 10;
-          Text.draw("mouse_y " + mouse_y, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("visible chunks " + visible_chunks_set.size, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
 
-          Text.draw("edit tilex " + edit_tilex, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("mouse_x " + mouse_x, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
-          Text.draw("edit tiley " + edit_tiley, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("mouse_y " + mouse_y, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
 
-          Text.draw("edit chunkx " + edit_chunkx, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("edit tilex " + edit_tilex, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
-          Text.draw("edit chunky " + edit_chunky, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("edit tiley " + edit_tiley, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
+          debug_off += 10;
+
+          Text.draw("edit chunkx " + edit_chunkx, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
+          debug_off += 10;
+          Text.draw("edit chunky " + edit_chunky, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
 
           if (delete_chunk_index != -1)
@@ -686,7 +706,7 @@ public class World
               {
                 RenderUtil.render_box(offx_tile + Config.CONF.EDITOR_TILE_SPACING.value * (i - 1) - 1, offy_tile - 1, 18, 18, Color.GOLD);
               }
-              Main.batch.draw(Res.BLOCK.sheet[i], offx_tile + Config.CONF.EDITOR_TILE_SPACING.value * (i - 1), offy_tile);
+              Main.batch.draw(Res.PLATFORM.sheet[i], offx_tile + Config.CONF.EDITOR_TILE_SPACING.value * (i - 1), offy_tile);
             }
           }
           break;
@@ -701,7 +721,7 @@ public class World
               {
                 RenderUtil.render_box(offx_tile + Config.CONF.EDITOR_TILE_SPACING.value * (i - 1) - 1, offy_tile - 1, 18, 18, Color.GOLD);
               }
-              Main.batch.draw(Res.BLOCK.sheet[i], offx_tile + Config.CONF.EDITOR_TILE_SPACING.value * (i - 1), offy_tile);
+              Main.batch.draw(Res.PLATFORM.sheet[i], offx_tile + Config.CONF.EDITOR_TILE_SPACING.value * (i - 1), offy_tile);
             }
             Tile tile = Tile.safe_ord(edit_tile_ordinal);
             Text.draw("current tile: ", 100, 50, Color.LIGHT_GRAY);
@@ -726,24 +746,37 @@ public class World
       case PLAY:
       case GAMEOVER:
       {
+        Main.batch.draw(Res.BACKGROUND.sheet[1], 0, 0);
+        Main.batch.draw(Res.BACKGROUND.sheet[0], 0, 0);
+
+        for (int i = 0; i < sm_stars.num_lines(); i++)
+        {
+          if (sm_stars.get(i, 0) != -1)
+          {
+            TextureRegion reg = Star.get_region(sm_stars.get(i,0), sm_stars.get(i, 3));
+            float parallax = player.posy / (sm_stars.get(i, 0) + 10);
+            Main.batch.draw(reg, sm_stars.get(i, 1), sm_stars.get(i, 2) - (parallax));
+          }
+        }
+
         if (Main.DEBUG)
         {
-          Text.draw("posx " + player.posx, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("posx " + player.posx, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
 
-          Text.draw("posy " + player.posy, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("posy " + player.posy, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
 
-          Text.draw("vy " + player.vy, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("vy " + player.vy, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
 
-          Text.draw("falling " + player.falling, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("falling " + player.falling, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
 
-          Text.draw("wall progress " + wall_progress, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("wall progress " + wall_progress, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
 
-          Text.draw("gameover progress " + gameover_opacity, 2, Main.SCREEN_HEIGHT - debug_off, Color.NAVY);
+          Text.draw("gameover progress " + gameover_opacity, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
         }
 
