@@ -235,7 +235,7 @@ public class Entity
 
         if (!falling)
         {
-          if (!World.collision(posx, posy - 4, -1))
+          if (!World.collision(posx, posy - 4, -1) && !World.collision(posx - type.collision_width(), posy - 4, -1) && !World.collision(posx + type.collision_width(), posy - 4, -1))
           {
             coyote = true;
           }
@@ -365,9 +365,25 @@ public class Entity
       float nx = posx + vx * type.walk_speed() * delta;
       float ny = posy + vy * delta;
 
-      boolean collision_hori = World.collision(nx, posy, vy);
+      int collision_width = type.collision_width();
+      boolean collision_hori = false; //World.collision(nx, posy, vy);
+      // HORIZONTAL COLLISION:
+      if (nx < posx)
+      {
+        // MOVING TO THE LEFT
+        // TODO: 02.10.23 here I set the vy to positive
+        collision_hori = World.collision(nx - collision_width, posy, 1);
+      } else if (nx > posx)
+      {
+        collision_hori = World.collision(nx + collision_width, posy, 1);
+      }
+
       boolean collision_vert = World.collision(posx, ny, vy);
+
+      collision_vert = (World.collision(nx - collision_width, ny, vy) || World.collision(nx, ny, vy) || World.collision(nx + collision_width, ny, vy));
+
       boolean collision_vert2 = World.collision(nx, ny, vy);
+
 
       int num_pixels_per_move = MathUtils.floor(Math.abs(posy - ny));
 
@@ -377,7 +393,11 @@ public class Entity
         for (int i = 0; i < num_pixels_per_move; i++)
         {
           float interp_posy = MathUtils.lerp(posy, ny, i / ((float) (num_pixels_per_move - 1)));
-          if (World.collision(posx, interp_posy, vy))
+
+          // FIRST SIMPLE APPROACH, USE 3 POINTS FOR COLLISION INSTEAD OF 1 (horizontal movement will still be
+          // neglected though!
+
+          if (World.collision(nx - collision_width, interp_posy, vy) || World.collision(nx, interp_posy, vy) || World.collision(nx + collision_width, interp_posy, vy))
           {
             jumped = false;
             falling = false;
@@ -471,6 +491,15 @@ public class Entity
         Main.batch.draw(reg, px - reg.getRegionWidth() / 2f, py);
         Main.batch.setColor(Color.WHITE);
 
+        if (Main.DEBUG)
+        {
+          Main.batch.setColor(Color.SCARLET);
+          Main.batch.draw(Res.pixel, px - type.collision_width(), py);
+          Main.batch.draw(Res.pixel, px + type.collision_width(), py);
+          Main.batch.draw(Res.pixel, px, py);
+          Main.batch.setColor(Color.WHITE);
+        }
+
       }
       break;
       case ROCKET:
@@ -526,6 +555,18 @@ public class Entity
       this.slow_gravity = slow_gravity;
     }
 
+    public int collision_width()
+    {
+      int ret = 0;
+      switch (this)
+      {
+        case PLAYER:
+          ret = Config.CONF.PLAYER_COLLISION_WIDTH.value;
+          break;
+      }
+      return ret;
+    }
+
     public int walk_speed()
     {
       int ret = 5;
@@ -544,9 +585,10 @@ public class Entity
       switch (this)
       {
         case PLAYER:
-          if(cat_wait > Config.CONF.TIME_SIT.value){
+          if (cat_wait > Config.CONF.TIME_SIT.value)
+          {
             ret = right ? Anim.CAT_SCHLECK_RIGHT : Anim.CAT_SCHLECK_LEFT;
-          }else
+          } else
           {
             ret = right ? Anim.CAT_IDLE_RIGHT : Anim.CAT_IDLE_LEFT;
           }
