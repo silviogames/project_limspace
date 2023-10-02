@@ -665,7 +665,7 @@ public class Text
 
 		if (textdata.get(line, TEXT_DATA.STATUS.offset) >= 0)
 		{
-			Color temp = new Color();
+			//Color temp = new Color();
 			//if (contrast)
 			//{
 			//	Main.batch.setColor(0, 0, 0, 0.4f * color.a);
