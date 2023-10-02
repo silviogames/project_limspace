@@ -15,7 +15,7 @@ public enum Res
 
   PLATFORM(Tile.values().length, 16, 16),
 
-  CAT(20, 30, 34),
+  CAT(22, 30, 34),
 
   BACKGROUND(2, 400,300),
 
@@ -25,13 +25,15 @@ public enum Res
 
   WALL_BLOCK(),
 
-  ROCKET_CAT(3, 22, 32),
+  ROCKET_CAT(2, 24, 46),
 
   ROCKET_FIRE(2, 22,22),
 
   PLANETS(2, 256,172),
 
   SMOKE(7, 10, 10),
+
+  SIGN(),
   ;
 
   static final Array<Anim> load_queue = new Array<>();
@@ -82,10 +84,10 @@ public enum Res
     load_queue.add(Anim.CAT_RUN_RIGHT);
     load_queue.add(Anim.CAT_FALL_LEFT);
     load_queue.add(Anim.CAT_FALL_RIGHT);
-    load_queue.add(Anim.CAT_SCHLECK_LEFT);
-    load_queue.add(Anim.CAT_SCHLECK_RIGHT);
     load_queue.add(Anim.CAT_JUMP_LEFT);
     load_queue.add(Anim.CAT_JUMP_RIGHT);
+    load_queue.add(Anim.CAT_SCHLECK_LEFT);
+    load_queue.add(Anim.CAT_SCHLECK_RIGHT);
     load_anims(CAT, 0);
     load_queue.clear();
 

@@ -12,10 +12,11 @@ public enum Anim
   CAT_RUN_RIGHT(2, 0.08f, -1, false, 0, 1),
   CAT_FALL_LEFT(2, 0.2f, -1, false, 0, 1),
   CAT_FALL_RIGHT(2, 0.2f, -1, false, 0, 1),
-  CAT_SCHLECK_LEFT(2, 0.2f, -1, false, 0, 1),
-  CAT_SCHLECK_RIGHT(2, 0.2f, -1, false, 0, 1),
   CAT_JUMP_LEFT(2, 0.2f, -1, false, 0, 1),
   CAT_JUMP_RIGHT(2, 0.2f, -1, false, 0, 1),
+
+  CAT_SCHLECK_LEFT(3, 0.2f, -1, false, 0, 1, 2),
+  CAT_SCHLECK_RIGHT(3, 0.2f, -1, false, 0, 1, 2),
 
   STAR_STATIC(3, 0.1f, -1, false, 0, 1, 2),
   STAR_DYNAMIC_1(2, 0.8f, -1, false, 0, 1),
@@ -23,6 +24,7 @@ public enum Anim
   STAR_DYNAMIC_3(3, 0.6f, -1, false, 0, 1, 2),
 
   //ROCKET(2, 0.2f, -1, false, 0, 1),
+  ROCKET_FIRE(2, 0.1f, -1, false, 0, 1),
 
   SMOKE(7, 0.5f, -1, false, 0, 1, 2, 3, 4, 5, 6),
 
