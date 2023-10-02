@@ -415,17 +415,17 @@ public class Entity
 
         if (Main.DEBUG)
         {
-          if (falling)
-          {
-            Main.batch.setColor(Color.SCARLET);
-            Main.batch.draw(Res.pixel, px, py + 30, 10, 3);
-          }
+          //if (falling)
+          //{
+          //  Main.batch.setColor(Color.SCARLET);
+          //  Main.batch.draw(Res.pixel, px, py + 30, 10, 3);
+          //}
 
-          Main.batch.setColor(Color.SCARLET);
-          Main.batch.draw(Res.pixel, px - type.collision_width(), py);
-          Main.batch.draw(Res.pixel, px + type.collision_width(), py);
-          Main.batch.draw(Res.pixel, px, py);
-          Main.batch.setColor(Color.WHITE);
+          //Main.batch.setColor(Color.SCARLET);
+          //Main.batch.draw(Res.pixel, px - type.collision_width(), py);
+          //Main.batch.draw(Res.pixel, px + type.collision_width(), py);
+          //Main.batch.draw(Res.pixel, px, py);
+          //Main.batch.setColor(Color.WHITE);
         }
 
       }

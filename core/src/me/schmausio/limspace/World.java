@@ -44,8 +44,8 @@ public class World
   static int delete_chunk_index = -1;
   static int delete_chunk_counter = 0;
 
-  // used to load from sub directory with name of the level
-  public static String level_name = "foobar";
+  public static int level_index = 0;
+  public static String[] list_levels = new String[5];
 
   public static float global_offset_x, global_offset_y;
   public static float camera_offset_x, camera_offset_y = -50;
@@ -117,10 +117,13 @@ public class World
   public static float wall_width = 300;
 
   public static Color gameover_pause_back = Color.BLACK.cpy();
+  public static Color gameover_finished = Color.BLACK.cpy();
 
   // GAMEOVER DATA:
 
   public static float gameover_opacity = 0f;
+
+  public static float gamefinished_progress = 0f;
 
 
   public static Color gameover_color_back = Color.BLACK.cpy();
@@ -138,6 +141,8 @@ public class World
   {
     gameover_pause_back.a = 0.5f;
 
+    gameover_finished.a = 0f;
+
     edit_layer_names[0] = "TILES";
     edit_layer_names[1] = "OBJECTS";
     edit_layer_names[2] = "DECO";
@@ -149,6 +154,12 @@ public class World
     {
       sm_stars.add_line(Star.random(), MathUtils.random(0, Main.SCREEN_WIDTH), MathUtils.random(-100, Main.SCREEN_HEIGHT + 100), MathUtils.random(0, 1000));
     }
+
+    list_levels[0] = "test";
+    list_levels[1] = "level_zwo";
+    list_levels[2] = "level_tres";
+    list_levels[3] = "level_vier";
+    list_levels[4] = "level_cinco";
   }
 
   public static void init_status(WorldStatus new_status)
@@ -192,10 +203,10 @@ public class World
         FileHandle chunk_dir;
         if (Main.RELEASE)
         {
-          chunk_dir = Gdx.files.internal("levels/" + level_name + "/");
+          chunk_dir = Gdx.files.internal("levels/" + list_levels[level_index] + "/");
         } else
         {
-          chunk_dir = Gdx.files.local("levels/" + level_name + "/");
+          chunk_dir = Gdx.files.local("levels/" + list_levels[level_index] + "/");
         }
         if (chunk_dir.exists())
         {
@@ -334,7 +345,14 @@ public class World
         rocket_progress += delta / ((float) Config.CONF.ROCKET_SPEED.value);
         if (rocket_progress >= 1f)
         {
-          init_status(WorldStatus.LOAD_LEVEL);
+          level_index++;
+          if (level_index >= list_levels.length)
+          {
+            init_status(WorldStatus.GAME_FINISHED);
+          } else
+          {
+            init_status(WorldStatus.LOAD_LEVEL);
+          }
           return;
         }
 
@@ -711,6 +729,13 @@ public class World
         }
       }
       break;
+      case GAME_FINISHED:
+      {
+        gamefinished_progress += delta * (1 / 3f);
+        if (gamefinished_progress >= 1f) gamefinished_progress = 1f;
+        gameover_finished.a = Interpolation.smooth2.apply(gamefinished_progress);
+      }
+      break;
 
       case GAMEOVER:
       {
@@ -732,7 +757,8 @@ public class World
 
       case PLAY: // GAME LOOP
       {
-        if(Main.DEBUG) {
+        if (Main.DEBUG)
+        {
           delta = delta;
         }
         wall_progress += delta * (1 / (float) Config.CONF.WALL_SPEED.value);
@@ -891,7 +917,7 @@ public class World
         RenderUtil.render_box(0, 0, Main.SCREEN_WIDTH, editor_box_height, Color.DARK_GRAY);
 
         Text.draw("level: ", Main.SCREEN_WIDTH - 80, 50, Color.LIGHT_GRAY);
-        Text.cdraw(level_name, Main.SCREEN_WIDTH - 30, 50, Color.GOLD);
+        Text.cdraw(list_levels[level_index], Main.SCREEN_WIDTH - 30, 50, Color.GOLD);
 
         Text.draw("-EDITOR-", 10, 50, Color.LIGHT_GRAY);
         for (int i = 0; i < 4; i++)
@@ -1004,6 +1030,7 @@ public class World
       case GAMEOVER:
       case PAUSE:
       case ROCKET_FLY:
+      case GAME_FINISHED:
       {
         Main.batch.draw(Res.BACKGROUND.sheet[1], 0, 0);
         Main.batch.draw(Res.BACKGROUND.sheet[0], 0, 0);
@@ -1167,6 +1194,11 @@ public class World
 
           Main.batch.draw(Res.ROCKET_FIRE.sheet[Anim.ROCKET_FIRE.get_frame(fire_anim_progress)], rocket_lerped_x - Res.ROCKET_FIRE.sheet[0].getRegionWidth() / 2f, rocket_lerped_y - Config.CONF.ROCKET_FIRE_YOFF.value);
           Main.batch.draw(Res.ROCKET_CAT.sheet[1], rocket_lerped_x - Res.ROCKET_CAT.sheet[1].getRegionWidth() / 2f, rocket_lerped_y);
+        } else if (status == WorldStatus.GAME_FINISHED)
+        {
+          RenderUtil.render_box(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT, gameover_finished);
+          Text.cdraw("GAME COMPLETED", Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT / 2 + 30, Color.GOLD, 2f);
+          Text.cdraw("thank you for playing :)", Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT / 2, Color.GOLD);
         }
       }
       break;
@@ -1214,7 +1246,7 @@ public class World
         System.out.println("not saving negative coordinate chunks");
         continue;
       }
-      FileHandle chunk_file = Gdx.files.local("levels/" + level_name + "/" + Chunk.chunk_coordinate_to_savename(c.cx) + "_" + Chunk.chunk_coordinate_to_savename(c.cy) + ".json");
+      FileHandle chunk_file = Gdx.files.local("levels/" + list_levels[level_index] + "/" + Chunk.chunk_coordinate_to_savename(c.cx) + "_" + Chunk.chunk_coordinate_to_savename(c.cy) + ".json");
       chunk_file.writeString(json.toJson(c), false);
     }
   }
@@ -1273,6 +1305,8 @@ public class World
     EDIT_CHUNKS,
 
     ROCKET_FLY,
+
+    GAME_FINISHED,
     ;
   }
 }
