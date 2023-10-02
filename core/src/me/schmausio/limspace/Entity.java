@@ -80,7 +80,7 @@ public class Entity
   public void update(float delta, int index)
   {
     if (dead) return;
-    if(type == EntityType.PLAYER && hide_player) return;
+    if (type == EntityType.PLAYER && hide_player) return;
 
     switch (type)
     {
@@ -95,8 +95,18 @@ public class Entity
             {
               if (Util.simple_dist(posx, posy, ent.posx, ent.posy + 10) < 20 * 20)
               {
-                System.out.println("touched rocket");
                 hide_player = true;
+
+                float px = World.global_offset_x + ent.posx;
+                float py = World.global_offset_y + ent.posy;
+
+                ent.dead = true;
+
+                World.rocket_start_x = (int) px;
+                World.rocket_start_y = (int) py;
+                World.rocket_progress = 0f;
+                World.init_status(World.WorldStatus.ROCKET_FLY);
+                return;
               }
             }
           }
@@ -435,11 +445,13 @@ public class Entity
     float px = World.global_offset_x + posx;
     float py = World.global_offset_y + posy;
 
+    if(dead ) return;
+
     switch (type)
     {
       case PLAYER:
       {
-        if(hide_player) break;
+        if (hide_player) break;
         boolean blink = time_blink > 0f && MathUtils.floor(time_blink / 0.07f) % 2 == 0;
         Main.batch.setColor(blink ? RenderUtil.color_blink : Color.WHITE);
         TextureRegion reg = Res.get_frame(anim_time, anim, false);

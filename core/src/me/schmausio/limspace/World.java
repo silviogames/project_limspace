@@ -109,19 +109,25 @@ public class World
   public static float wall_width = 300;
 
   public static Color gameover_pause_back = Color.BLACK.cpy();
-  
+
   // GAMEOVER DATA:
 
   public static float gameover_opacity = 0f;
-  
+
 
   public static Color gameover_color_back = Color.BLACK.cpy();
   public static Color gameover_color_text = Color.BLACK.cpy();
 
   public static Color debug_text_color = Color.LIGHT_GRAY.cpy();
 
+  // set when touching rocket to play animation
+  public static int rocket_start_x, rocket_start_y;
+  public static float rocket_progress = 0f;
+
   static
   {
+    gameover_pause_back.a = 0.5f;
+
     edit_layer_names[0] = "TILES";
     edit_layer_names[1] = "OBJECTS";
     edit_layer_names[2] = "DECO";
@@ -161,6 +167,8 @@ public class World
 
         list_entities.add(player);
         Entity.hide_player = false;
+
+        rocket_progress = 0f;
 
         // this might be entered after finished another level so I need to clean up
         list_chunks.clear();
@@ -310,6 +318,17 @@ public class World
 
     switch (status)
     {
+      case ROCKET_FLY:
+      {
+        rocket_progress += delta / ((float) Config.CONF.ROCKET_SPEED.value);
+        if (rocket_progress >= 1f)
+        {
+          init_status(WorldStatus.LOAD_LEVEL);
+          return;
+        }
+      }
+      break;
+
       case PAUSE:
       {
         if (Main.DEBUG && Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
@@ -683,11 +702,18 @@ public class World
           return;
         }
 
+        if (Main.DEBUG && Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
+        {
+          init_status(WorldStatus.PAUSE);
+          return;
+        }
+
         if (Main.DEBUG && Gdx.input.isKeyJustPressed(Input.Keys.F1))
         {
           init_status(WorldStatus.EDIT_CHUNKS);
           return;
         }
+
 
         for (int i = 0; i < list_entities.size; i++)
         {
@@ -930,6 +956,7 @@ public class World
       case PLAY: // RENDER
       case GAMEOVER:
       case PAUSE:
+      case ROCKET_FLY:
       {
         Main.batch.draw(Res.BACKGROUND.sheet[1], 0, 0);
         Main.batch.draw(Res.BACKGROUND.sheet[0], 0, 0);
@@ -1030,10 +1057,7 @@ public class World
           Main.batch.draw(Res.WALL_EDGE.region, wall_x, wall_y + (i * Res.WALL_EDGE.region.getRegionHeight()));
         }
 
-        for (int i = 0; i < Config.CONF.WALL_VERTICAL_NUMBER.value; i++)
-        {
-        }
-
+        // OLD UI ELEMENTS (HEALTH, BOXCOUNT)
         //for (int i = 1; i <= 3; i++)
         //{
         //   Main.batch.setColor(i <= Entity.wutz_life ? Color.WHITE : Color.DARK_GRAY);
@@ -1061,10 +1085,16 @@ public class World
 
           Text.cdraw("GAME OVER", Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT / 2, gameover_color_text, 2f);
           Text.cdraw("press [space] to restart", Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT / 2 - 20, gameover_color_text);
-        }else if (status == WorldStatus.PAUSE){
+        } else if (status == WorldStatus.PAUSE)
+        {
           RenderUtil.render_box(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT, gameover_pause_back);
-          // TODO: 02.10.23 fix 
-          
+          Text.cdraw("GAME PAUSED", Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT / 2, Color.GOLD, 2f);
+          Text.cdraw("press [escape] to play", Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT / 2 - 20, Color.GOLD);
+        } else if (status == WorldStatus.ROCKET_FLY)
+        {
+          float rocket_lerped_x = MathUtils.lerp(rocket_start_x, rocket_start_x + 30, Interpolation.smooth.apply(rocket_progress));
+          float rocket_lerped_y = MathUtils.lerp(rocket_start_y, rocket_start_y + 250, Interpolation.smooth.apply(rocket_progress));
+          Main.batch.draw(Res.ROCKET_CAT.sheet[1], rocket_lerped_x - Res.ROCKET_CAT.sheet[1].getRegionWidth() / 2f, rocket_lerped_y);
         }
       }
       break;
@@ -1170,6 +1200,7 @@ public class World
 
     EDIT_CHUNKS,
 
+    ROCKET_FLY,
     ;
   }
 }

@@ -82,6 +82,7 @@ public class Config
       WALL_VERTICAL_NUMBER,
       PLAYER_SPAWN_TILEX,
       PLAYER_SPAWN_TILEY,
+      ROCKET_SPEED,
 
 
       EDITOR_MOVE_SPEED,
