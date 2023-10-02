@@ -36,7 +36,7 @@ public class Main extends ApplicationAdapter
 
 		Config.load_config(true);
 
-		World.level_name = "test";
+		World.level_name = "level_zwo";
 		World.init_status(World.WorldStatus.LOAD_LEVEL);
   }
 

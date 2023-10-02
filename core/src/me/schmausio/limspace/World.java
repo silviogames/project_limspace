@@ -36,7 +36,7 @@ public class World
   static int delete_chunk_counter = 0;
 
   // used to load from sub directory with name of the level
-  public static String level_name = "test";
+  public static String level_name = "level_zwo";
 
   public static float global_offset_x, global_offset_y;
   public static float camera_offset_x, camera_offset_y = -50;
