@@ -345,7 +345,7 @@ public class World
         {
           int sx = (int) (rocket_lerped_x + MathUtils.random(-Config.CONF.ROCKET_SMOKE_OFFSET.value, Config.CONF.ROCKET_SMOKE_OFFSET.value));
           int sy = (int) (rocket_lerped_y + MathUtils.random(-Config.CONF.ROCKET_SMOKE_OFFSET.value, Config.CONF.ROCKET_SMOKE_OFFSET.value) - 10);
-          sm_smoke.add_line(0, sx, sy, 0, 0,  MathUtils.random(10, 80));
+          sm_smoke.add_line(0, sx, sy, 0, 0, MathUtils.random(10, 80));
         }
 
         for (int i = 0; i < sm_smoke.num_lines(); i++)

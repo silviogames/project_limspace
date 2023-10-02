@@ -15,6 +15,8 @@ public class Entity
 
   public static boolean jumped = false;
 
+  public static boolean accend = false;
+
   boolean falling = true;
   boolean coyote = false;
   public EntityType type;
@@ -223,19 +225,21 @@ public class Entity
           if (Math.abs(vx) < 0.001f) vx = 0;
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE))
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
         {
           if (!falling)
           {
+            // SETTING THIS TO TRUE TO DO IT LATER IF NOT FALLING
             jumped = true;
-            falling = true;
-            vy = Config.CONF.JUMP_STRENGTH.value;
+            //System.out.println("JUMP ATTEMPT");
+            //falling = true;
+            //vy = Config.CONF.JUMP_STRENGTH.value;
           }
         }
 
         if (!falling)
         {
-          if (!World.collision(posx, posy - 4, -1) && !World.collision(posx - type.collision_width(), posy - 4, -1) && !World.collision(posx + type.collision_width(), posy - 4, -1))
+          if (!World.collision(posx, posy - 2, -1) && !World.collision(posx - type.collision_width(), posy - 2, -1) && !World.collision(posx + type.collision_width(), posy - 2, -1))
           {
             coyote = true;
           }
@@ -257,9 +261,9 @@ public class Entity
         {
           anim = type.anim_idle(this, looking_right);
         }
-        if (vy != 0)
+        if (Math.abs(vy) != 0)
         {
-          anim = type.anim_fall(this, looking_right, jumped && vy > -50);
+          anim = type.anim_fall(this, looking_right, accend && vy > -50);
         }
       }
       break;
@@ -358,6 +362,8 @@ public class Entity
       {
         vy -= (Config.CONF.GRAVITY.value / (type.slow_gravity ? 100f : 10f)) * delta;
         vy = MathUtils.clamp(vy, -Config.CONF.MAX_FALLING_SPEED.value, Config.CONF.MAX_FALLING_SPEED.value);
+
+        if (Entity.accend && vy < -50) accend = false;
       } else
       {
       }
@@ -371,7 +377,6 @@ public class Entity
       if (nx < posx)
       {
         // MOVING TO THE LEFT
-        // TODO: 02.10.23 here I set the vy to positive
         collision_hori = World.collision(nx - collision_width, posy, 1);
       } else if (nx > posx)
       {
@@ -384,7 +389,6 @@ public class Entity
 
       boolean collision_vert2 = World.collision(nx, ny, vy);
 
-
       int num_pixels_per_move = MathUtils.floor(Math.abs(posy - ny));
 
       if (num_pixels_per_move > 1)
@@ -394,12 +398,8 @@ public class Entity
         {
           float interp_posy = MathUtils.lerp(posy, ny, i / ((float) (num_pixels_per_move - 1)));
 
-          // FIRST SIMPLE APPROACH, USE 3 POINTS FOR COLLISION INSTEAD OF 1 (horizontal movement will still be
-          // neglected though!
-
           if (World.collision(nx - collision_width, interp_posy, vy) || World.collision(nx, interp_posy, vy) || World.collision(nx + collision_width, interp_posy, vy))
           {
-            jumped = false;
             falling = false;
             coyote_time = 0;
             coyote = false;
@@ -420,7 +420,6 @@ public class Entity
       {
         if (collision_vert)
         {
-          jumped = false;
           falling = false;
           coyote_time = 0;
           coyote = false;
@@ -442,7 +441,7 @@ public class Entity
       if (posx <= World.wall_position(false))
       {
         posx = World.wall_position(false);
-        if (!falling && !World.collision(posx, posy - 4, -1))
+        if (!falling && !World.collision(posx, posy - 2, -1))
         {
           falling = true;
         }
@@ -451,7 +450,7 @@ public class Entity
       if (posx >= World.wall_position(true))
       {
         posx = World.wall_position(true);
-        if (!falling && !World.collision(posx, posy - 4, -1))
+        if (!falling && !World.collision(posx, posy - 2, -1))
         {
           falling = true;
         }
@@ -459,6 +458,14 @@ public class Entity
 
       float[] ret = anim.update(anim_time, delta);
       anim_time = ret[0];
+    }
+
+    if (!falling && jumped)
+    {
+      jumped = false;
+      accend = true;
+      falling = true;
+      vy = Config.CONF.JUMP_STRENGTH.value;
     }
 
     if (type == EntityType.PLAYER)
@@ -493,6 +500,12 @@ public class Entity
 
         if (Main.DEBUG)
         {
+          if (falling)
+          {
+            Main.batch.setColor(Color.SCARLET);
+            Main.batch.draw(Res.pixel, px, py + 30, 10, 3);
+          }
+
           Main.batch.setColor(Color.SCARLET);
           Main.batch.draw(Res.pixel, px - type.collision_width(), py);
           Main.batch.draw(Res.pixel, px + type.collision_width(), py);
