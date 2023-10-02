@@ -32,8 +32,6 @@ public class Entity
   static Timer timer_AI = new Timer(0.1f);
   static boolean AI_check = false;
 
-  static Entity box;
-
   boolean dead = false;
 
   static int wutz_life = 3;
@@ -42,13 +40,9 @@ public class Entity
   static float check_point_x = Chunk.TILE_SIZE * 10;
   static float check_point_y = Chunk.TILE_SIZE * 30;
 
-  static int num_collected_box = 0;
-
   float despawn_time = 0f;
 
   // postbox
-  boolean postbox_active = false;
-
   static String message = "";
   static float time_message = 0f;
   static int message_posx, message_posy;
@@ -240,7 +234,7 @@ public class Entity
         }
         if (vy != 0)
         {
-          anim = type.anim_fall(this, looking_right,jumped && vy > -50);
+          anim = type.anim_fall(this, looking_right, jumped && vy > -50);
         }
       }
       break;
@@ -440,6 +434,9 @@ public class Entity
 
       }
       break;
+      case ROCKET:
+        Main.batch.draw(Res.ROCKET_CAT.sheet[0], px - Res.ROCKET_CAT.sheet[0].getRegionWidth() / 2f, py);
+        break;
       //case ENEMY_MUSHROOM:
       //{
       //   TextureRegion reg = Res.get_frame(anim_time, anim, flip);

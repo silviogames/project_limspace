@@ -1,6 +1,7 @@
 package me.schmausio.limspace;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 
@@ -47,7 +48,6 @@ public class Chunk implements Json.Serializable
             entity.origin_chunk = combined_pos;
             World.list_spawn.add(entity);
           }
-
           break;
         }
       }
@@ -120,6 +120,16 @@ public class Chunk implements Json.Serializable
         Main.batch.setColor(Color.WHITE);
         Main.batch.draw(Res.PLATFORM.sheet[tiles.get(ix, iy)], px, py);
 
+        if(World.status == World.WorldStatus.EDIT_CHUNKS)
+        {
+          Chunk_Object co = Chunk_Object.safe_ord(objects.get(ix, iy));
+          if (co != Chunk_Object.NONE)
+          {
+            Main.batch.setColor(1f, 1f, 1f, 0.5f);
+            Main.batch.draw(co.get_preview(), px - co.get_preview().getRegionWidth() / 2f, py);
+            Main.batch.setColor(Color.WHITE);
+          }
+        }
       }
     }
 
@@ -243,6 +253,18 @@ public class Chunk implements Json.Serializable
       {
         return values()[ordinal];
       }
+    }
+
+    public TextureRegion get_preview()
+    {
+      TextureRegion ret = Res.pixel;
+      switch (this)
+      {
+        case ROCKET:
+          ret = Res.ROCKET_CAT.sheet[0];
+          break;
+      }
+      return ret;
     }
   }
 }

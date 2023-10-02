@@ -25,17 +25,11 @@ public enum Res
 
   WALL_BLOCK(),
 
-  //BOX(),
-  //BLOCK1(Tile.values().length, 16, 16),
-  //PIG(10, 32, 26),
-  //ENEMY_FLOWER(5, 26, 24),
-  //PARTICLE_FLOWER(4, 10, 10),
-  //DECORATION(Deco.values().length, 98, 123),
-  //HEART(),
-  //POSTBOX(2, 32, 43),
-  //ENEMY_MUSHROOM(5, 20, 23),
-  //SKY(),
-  //PARTICLE_MUSHROOM(),
+  ROCKET_CAT(3, 22, 32),
+
+  ROCKET_FIRE(2, 22,22),
+
+  PLANETS(2, 256,172),
   ;
 
   static final Array<Anim> load_queue = new Array<>();
@@ -98,6 +92,10 @@ public enum Res
     load_queue.add(Anim.STAR_DYNAMIC_2);
     load_queue.add(Anim.STAR_DYNAMIC_3);
     load_anims(STARS, 0);
+    load_queue.clear();
+
+    load_queue.add(Anim.ROCKET);
+    load_anims(ROCKET_CAT, 0);
     load_queue.clear();
 
       /*

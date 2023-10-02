@@ -21,6 +21,9 @@ public class Main extends ApplicationAdapter
 
 	public static final boolean DEBUG = true;
 
+	public static final boolean RENDER_DEBUG_INFO = false;
+	public static final boolean RELEASE = false;
+
   @Override
   public void create()
   {
@@ -36,7 +39,7 @@ public class Main extends ApplicationAdapter
 
 		Config.load_config(true);
 
-		World.level_name = "test";
+		World.level_name = "schmausel";
 		World.init_status(World.WorldStatus.LOAD_LEVEL);
   }
 

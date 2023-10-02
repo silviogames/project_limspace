@@ -32,11 +32,12 @@ public class World
   // 2 -> y position
   // 3 -> anim time
 
+
   static int delete_chunk_index = -1;
   static int delete_chunk_counter = 0;
 
   // used to load from sub directory with name of the level
-  public static String level_name = "test";
+  public static String level_name = "foobar";
 
   public static float global_offset_x, global_offset_y;
   public static float camera_offset_x, camera_offset_y = -50;
@@ -47,6 +48,8 @@ public class World
   // 0 -> waiting for copy
   // 1 -> copy ongoing
   // 2 -> have something in copy buffer to paste
+
+  public final static int editor_box_height = 60;
 
   public static int copy_start_tilex = -1;
   public static int copy_start_tiley = -1;
@@ -59,6 +62,7 @@ public class World
   public static Flatbyte copied_tile_data = new Flatbyte(64, 64, (byte) -1, (byte) -1);
 
   public static int edit_tile_ordinal = 1;
+  public static int edit_object_ordinal = 1;
   public static int edit_wall_ordinal = 1;
 
   // TODO: 01.10.23 implement later when decoration is in the game
@@ -148,6 +152,12 @@ public class World
         player.vx = 0;
         player.vy = 0;
 
+        list_entities.clear();
+        list_spawn.clear();
+        list_entity_index_remove.clear();
+
+        list_entities.add(player);
+
         // this might be entered after finished another level so I need to clean up
         list_chunks.clear();
         chunk_map.clear();
@@ -155,13 +165,21 @@ public class World
 
         json = new Json();
         // populate the list of files that should be loaded
-        FileHandle chunk_dir = Gdx.files.local("levels/" + level_name + "/");
+
+        FileHandle chunk_dir;
+        if (Main.RELEASE)
+        {
+          chunk_dir = Gdx.files.internal("levels/" + level_name + "/");
+        } else
+        {
+          chunk_dir = Gdx.files.local("levels/" + level_name + "/");
+        }
         if (chunk_dir.exists())
         {
           list_chunk_files.addAll(chunk_dir.list());
         } else
         {
-          chunk_dir.mkdirs();
+          if (!Main.RELEASE) chunk_dir.mkdirs();
         }
       }
       break;
@@ -172,8 +190,18 @@ public class World
         if (list_chunks.size == 0)
         {
           Chunk start_chunk = new Chunk(0, 0);
+          for (int i = 0; i < Chunk.CHUNK_SIZE; i++)
+          {
+            for (int iy = 0; iy < 6; iy++)
+            {
+              start_chunk.tiles.set(i, iy, (byte) 2);
+            }
+            start_chunk.tiles.set(i, 6, (byte) 1);
+          }
           chunk_map.put(start_chunk.combined_pos, list_chunks.size);
           list_chunks.add(start_chunk);
+
+          save_chunks();
         }
 
         editor_x = player.posx;
@@ -326,7 +354,7 @@ public class World
         {
           case 0:
           { // TILE EDIT MODE
-            if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT))
+            if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && mouse_y > editor_box_height)
             {
               Chunk c = get_chunk(edit_chunkx, edit_chunky);
               if (c != null)
@@ -338,7 +366,7 @@ public class World
               }
             }
 
-            if (Gdx.input.isButtonJustPressed(Input.Buttons.MIDDLE))
+            if (Gdx.input.isButtonJustPressed(Input.Buttons.MIDDLE) && mouse_y > editor_box_height)
             {
               Chunk c = get_chunk(edit_chunkx, edit_chunky);
               if (c != null)
@@ -355,7 +383,7 @@ public class World
               }
             }
 
-            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && mouse_y > editor_box_height)
             {
               Chunk c = get_chunk(edit_chunkx, edit_chunky);
               if (c != null)
@@ -387,6 +415,45 @@ public class World
           break;
           case 1:
           { // OBJECT EDIT MODE
+
+            if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && mouse_y > editor_box_height)
+            {
+              Chunk c = get_chunk(edit_chunkx, edit_chunky);
+              if (c != null)
+              {
+                int local_tilex = edit_tilex % Chunk.CHUNK_SIZE;
+                int local_tiley = edit_tiley % Chunk.CHUNK_SIZE;
+                c.objects.set(local_tilex, local_tiley, (byte) 0);
+              }
+            }
+
+            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && mouse_y > editor_box_height)
+            {
+              Chunk c = get_chunk(edit_chunkx, edit_chunky);
+              if (c != null)
+              {
+                int local_tilex = edit_tilex % Chunk.CHUNK_SIZE;
+                int local_tiley = edit_tiley % Chunk.CHUNK_SIZE;
+                c.objects.set(local_tilex, local_tiley, (byte) edit_object_ordinal);
+              }
+            }
+
+            if (Gdx.input.isKeyJustPressed(Input.Keys.TAB))
+            {
+              if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))
+              {
+                edit_object_ordinal--;
+              } else
+              {
+                edit_object_ordinal++;
+              }
+              if (edit_object_ordinal < 1)
+                edit_object_ordinal = Chunk.Chunk_Object.values().length - 1;
+              if (edit_object_ordinal >= Chunk.Chunk_Object.values().length)
+              {
+                edit_object_ordinal = 1;
+              }
+            }
 
           }
           break;
@@ -438,7 +505,7 @@ public class World
                     for (int iy = copy_start_tiley; iy <= copy_end_tiley; iy++)
                     {
                       int local_tile = World.get_global_chunk_tile(ix, iy);
-                      if( local_tile > 0)
+                      if (local_tile > 0)
                       {
                         copied_tile_data.set(offx, offy, (byte) local_tile);
                       }
@@ -693,7 +760,7 @@ public class World
           edit_chunky = (int) (edit_tiley / ((float) Chunk.CHUNK_SIZE));
         }
 
-        if (Main.DEBUG)
+        if (Main.RENDER_DEBUG_INFO)
         {
           Text.draw("editor posx " + editor_x, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
@@ -735,7 +802,7 @@ public class World
           c.render();
         }
 
-        RenderUtil.render_box(0, 0, Main.SCREEN_WIDTH, 60, Color.DARK_GRAY);
+        RenderUtil.render_box(0, 0, Main.SCREEN_WIDTH, editor_box_height, Color.DARK_GRAY);
 
         Text.draw("level: ", Main.SCREEN_WIDTH - 80, 50, Color.LIGHT_GRAY);
         Text.cdraw(level_name, Main.SCREEN_WIDTH - 30, 50, Color.GOLD);
@@ -813,6 +880,28 @@ public class World
           break;
           case 1: // OBJECT MODE
           {
+            float px = World.global_offset_x + edit_tilex * Chunk.TILE_SIZE;
+            float py = World.global_offset_y + edit_tiley * Chunk.TILE_SIZE;
+
+            //RenderUtil.render_box(px - 1, py - 1, Chunk.TILE_SIZE + 2, Chunk.TILE_SIZE + 2, RenderUtil.color_edit_tile);
+            Chunk.Chunk_Object object = Chunk.Chunk_Object.safe_ord(edit_object_ordinal);
+
+            Main.batch.setColor(1f, 1f, 1f, 0.5f);
+            Main.batch.draw(object.get_preview(), px - object.get_preview().getRegionWidth() / 2f, py);
+            Main.batch.setColor(Color.WHITE);
+
+            int offx_tile = Config.CONF.EDITOR_TILE_OFFX.value;
+            int offy_tile = Config.CONF.EDITOR_TILE_OFFY.value;
+            for (int i = 1; i < Chunk.Chunk_Object.values().length; i++)
+            {
+              if (i == edit_object_ordinal)
+              {
+                RenderUtil.render_box(offx_tile + Config.CONF.EDITOR_TILE_SPACING.value * (i - 1) - 1, offy_tile - 1, 18, 18, Color.GOLD);
+              }
+              Main.batch.draw(Chunk.Chunk_Object.values()[i].get_preview(), offx_tile + Config.CONF.EDITOR_TILE_SPACING.value * (i - 1), offy_tile, 16, 16);
+            }
+            Text.draw("current object: ", 100, 50, Color.LIGHT_GRAY);
+            Text.draw(object.name(), 160, 50, Color.GOLD);
 
           }
           break;
@@ -825,7 +914,7 @@ public class World
 
       }
       break;
-      case PLAY:
+      case PLAY: // RENDER
       case GAMEOVER:
       {
         Main.batch.draw(Res.BACKGROUND.sheet[1], 0, 0);
@@ -841,7 +930,18 @@ public class World
           }
         }
 
-        if (Main.DEBUG)
+        // PLANET RENDERING
+
+        int planet_darkness = MathUtils.clamp(Config.CONF.PLANET_DARKNESS.value, 0, 100);
+        float planet_color = planet_darkness / 100f;
+        Main.batch.setColor(planet_color, planet_color, planet_color, 1f);
+        float parallax = player.posy / (Config.CONF.PLANET_PARALLAX.value);
+        Main.batch.draw(Res.PLANETS.sheet[0], Config.CONF.PLANET_BLUE_X.value, Config.CONF.PLANET_BLUE_Y.value - (parallax));
+
+        Main.batch.draw(Res.PLANETS.sheet[1], Config.CONF.PLANET_RED_X.value, Config.CONF.PLANET_RED_Y.value - (parallax));
+
+
+        if (Main.RENDER_DEBUG_INFO)
         {
           Text.draw("posx " + player.posx, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
@@ -859,6 +959,9 @@ public class World
           debug_off += 10;
 
           Text.draw("gameover progress " + gameover_opacity, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
+          debug_off += 10;
+
+          Text.draw("num. entities " + list_entities.size, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
         }
 
@@ -981,6 +1084,7 @@ public class World
 
   public static void save_chunks()
   {
+    if (!Main.DEBUG) return;
     Json json = new Json();
     for (int i = 0; i < list_chunks.size; i++)
     {
