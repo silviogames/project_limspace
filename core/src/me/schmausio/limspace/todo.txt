@@ -1,3 +1,8 @@
+create the levels
 
-render star parallax in background
+load levels in order after finishing another
+
+add copy paste to editor
+
+upload the game to test it to itch io
 

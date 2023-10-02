@@ -8,8 +8,12 @@ bounds:2,720,801,300
 cat
 bounds:2,684,619,34
 error_frame
-bounds:623,696,16,22
+bounds:805,932,16,22
 platform
-bounds:2,666,254,16
+bounds:2,666,288,16
 stars
 bounds:935,1013,87,7
+wall_block
+bounds:623,686,32,32
+wall_edge
+bounds:2,536,16,128

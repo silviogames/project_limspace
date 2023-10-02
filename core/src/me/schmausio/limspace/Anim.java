@@ -18,9 +18,9 @@ public enum Anim
    CAT_JUMP_RIGHT(2, 0.2f, -1, false, 0,1),
 
    STAR_STATIC(3, 0.1f, -1, false, 0, 1, 2),
-   STAR_DYNAMIC_1(2, 0.3f, -1, false, 0, 1),
-   STAR_DYNAMIC_2(3, 0.1f, -1, false, 0, 1, 2),
-   STAR_DYNAMIC_3(3, 0.15f, -1, false, 0, 1, 2),
+   STAR_DYNAMIC_1(2, 0.8f, -1, false, 0, 1),
+   STAR_DYNAMIC_2(3, 0.4f, -1, false, 0, 1, 2),
+   STAR_DYNAMIC_3(3, 0.6f, -1, false, 0, 1, 2),
 
    ;
    public static float[] returner = new float[3];

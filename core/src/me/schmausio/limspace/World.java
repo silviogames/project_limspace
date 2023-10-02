@@ -43,6 +43,21 @@ public class World
 
   public static float editor_x, editor_y;
 
+  public static int copy_status = 0;
+  // 0 -> waiting for copy
+  // 1 -> copy ongoing
+  // 2 -> have something in copy buffer to paste
+
+  public static int copy_start_tilex = -1;
+  public static int copy_start_tiley = -1;
+  public static int copy_end_tilex = -1;
+  public static int copy_end_tiley = -1;
+
+  public static int copy_width = 0;
+  public static int copy_height = 0;
+
+  public static Flatbyte copied_tile_data = new Flatbyte(64, 64, (byte) -1, (byte) -1);
+
   public static int edit_tile_ordinal = 1;
   public static int edit_wall_ordinal = 1;
 
@@ -51,7 +66,7 @@ public class World
   // 0 -> tiles
   // 1 -> objects
   // 2 -> decoration
-  // 3 -> back walls
+  // 3 -> copy paste
 
   public static String[] edit_layer_names = new String[4];
 
@@ -84,12 +99,10 @@ public class World
 
   static Json json;
 
-
   static final int end_x = 2630, end_y = 4880;
 
   public static float wall_progress = 0f;
   public static float wall_width = 300;
-
 
   // GAMEOVER DATA:
 
@@ -98,7 +111,6 @@ public class World
   public static Color gameover_color_back = Color.BLACK.cpy();
   public static Color gameover_color_text = Color.BLACK.cpy();
 
-
   public static Color debug_text_color = Color.LIGHT_GRAY.cpy();
 
   static
@@ -106,7 +118,7 @@ public class World
     edit_layer_names[0] = "TILES";
     edit_layer_names[1] = "OBJECTS";
     edit_layer_names[2] = "DECO";
-    edit_layer_names[3] = "WALLS";
+    edit_layer_names[3] = "COPY PASTE";
 
     list_entities.add(player);
 
@@ -256,6 +268,7 @@ public class World
     osc_box_hover.update(delta);
     osc_edit_tile.update(delta);
     RenderUtil.color_edit_tile.a = osc_edit_tile.value();
+    RenderUtil.color_edit_tile_copy_box.a = osc_edit_tile.value();
 
     Entity.AI_check = false;
     if (Entity.timer_AI.update(delta))
@@ -382,65 +395,100 @@ public class World
           }
           break;
           case 3:
-          { // WALLS EDIT MODE
+          { // COPY PASTE MODE (ONLY TILES RIGHT NOW!)
 
-            if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT))
+            if (copy_status == 0)
             {
-              Chunk c = get_chunk(edit_chunkx, edit_chunky);
-              if (c != null)
+              if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
               {
-                int local_tilex = edit_tilex % Chunk.CHUNK_SIZE;
-                int local_tiley = edit_tiley % Chunk.CHUNK_SIZE;
-                //System.out.println("removing local tile " + local_tilex + "|" + local_tiley);
-                c.walls.set(local_tilex, local_tiley, (byte) 0);
+                copy_status = 1;
+                copy_width = 1;
+                copy_height = 1;
+                copy_start_tilex = edit_tilex;
+                copy_start_tiley = edit_tiley;
+                copy_end_tilex = edit_tilex;
+                copy_end_tiley = edit_tiley;
               }
-            }
-
-            if (Gdx.input.isButtonJustPressed(Input.Buttons.MIDDLE))
+            } else if (copy_status == 1)
             {
-              Chunk c = get_chunk(edit_chunkx, edit_chunky);
-              if (c != null)
+              if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
               {
-                int local_tilex = edit_tilex % Chunk.CHUNK_SIZE;
-                int local_tiley = edit_tiley % Chunk.CHUNK_SIZE;
-                //System.out.println("removing local tile " + local_tilex + "|" + local_tiley);
-                byte local_val = c.walls.get(local_tilex, local_tiley);
-                if (local_val != 0)
+                copy_end_tilex = edit_tilex;
+                copy_end_tiley = edit_tiley;
+                if (copy_end_tilex >= copy_start_tilex && copy_end_tiley >= copy_start_tiley)
                 {
-                  System.out.println("picked tile from map");
-                  edit_wall_ordinal = local_val;
+                  copy_width = copy_end_tilex - copy_start_tilex + 1;
+                  copy_height = copy_end_tiley - copy_start_tiley + 1;
+                } else
+                {
+                  copy_width = 0;
+                  copy_height = 0;
                 }
-              }
-            }
-
-            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
-            {
-              Chunk c = get_chunk(edit_chunkx, edit_chunky);
-              if (c != null)
-              {
-                int local_tilex = edit_tilex % Chunk.CHUNK_SIZE;
-                int local_tiley = edit_tiley % Chunk.CHUNK_SIZE;
-                //System.out.println("removing local tile " + local_tilex + "|" + local_tiley);
-                c.walls.set(local_tilex, local_tiley, (byte) edit_wall_ordinal);
-              }
-            }
-
-            if (Gdx.input.isKeyJustPressed(Input.Keys.TAB))
-            {
-              if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))
-              {
-                edit_wall_ordinal--;
               } else
               {
-                edit_wall_ordinal++;
+                if (copy_width > 0 && copy_height > 0)
+                {
+                  copied_tile_data.reset();
+                  // COPY THE TILE DATA
+                  int offx = 0;
+                  int offy = 0;
+                  for (int ix = copy_start_tilex; ix <= copy_end_tilex; ix++)
+                  {
+                    for (int iy = copy_start_tiley; iy <= copy_end_tiley; iy++)
+                    {
+                      int local_tile = World.get_global_chunk_tile(ix, iy);
+                      copied_tile_data.set(offx, offy, (byte) local_tile);
+                      offy++;
+                    }
+                    offy = 0;
+                    offx++;
+                  }
+
+                  // released button after making box
+                  copy_status = 2;
+                  copy_end_tilex = -1;
+                  copy_end_tiley = -1;
+                  copy_start_tilex = -1;
+                  copy_start_tiley = -1;
+
+                  // I need those!
+                  //copy_width = 0;
+                  //copy_height = 0;
+                } else
+                {
+                  copy_status = 0;
+                }
               }
-              if (edit_wall_ordinal < 1) edit_wall_ordinal = Tile.values().length - 1;
-              if (edit_wall_ordinal >= Tile.values().length)
+            } else if (copy_status == 2)
+            {
+              if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT))
               {
-                edit_wall_ordinal = 1;
+                // reset
+                copy_status = 0;
+                copy_width = 0;
+                copy_height = 0;
+              } else if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT))
+              {
+                // paste the data into map
+
+                for (int ix = 0; ix < copy_width + 1; ix++)
+                {
+                  for (int iy = 0; iy < copy_height + 1; iy++)
+                  {
+                    int global_tilex = edit_tilex - copy_width + ix;
+                    int global_tiley = edit_tiley - copy_height + iy;
+                    int val = copied_tile_data.get(ix, iy);
+                    if (val != -1)
+                    {
+                      set_global_chunk_tile(global_tilex, global_tiley, val);
+                    }
+                  }
+                }
+                copy_status = 0;
+                copy_width = 0;
+                copy_height = 0;
               }
             }
-
           }
           break;
         }
@@ -541,7 +589,7 @@ public class World
 
         for (int i = 0; i < sm_stars.num_lines(); i++)
         {
-          sm_stars.set(i, 3,Star.update_star(sm_stars.get(i,3), sm_stars.get(i,0), delta));
+          sm_stars.set(i, 3, Star.update_star(sm_stars.get(i, 3), sm_stars.get(i, 0), delta));
         }
 
         if (wall_progress >= 0.99f)
@@ -698,21 +746,50 @@ public class World
         {
           case 3: // WALL MODE
           {
-            int offx_tile = Config.CONF.EDITOR_TILE_OFFX.value;
-            int offy_tile = Config.CONF.EDITOR_TILE_OFFY.value;
-            for (int i = 1; i < Tile.values().length; i++)
+            if (copy_status == 0)
             {
-              if (i == edit_wall_ordinal)
+              Text.draw("waiting for copy", 100, 30, Color.FIREBRICK);
+
+              float px = World.global_offset_x + edit_tilex * Chunk.TILE_SIZE;
+              float py = World.global_offset_y + edit_tiley * Chunk.TILE_SIZE;
+              RenderUtil.render_outer_box((int) px - 1, (int) py - 1, Chunk.TILE_SIZE + 2, Chunk.TILE_SIZE + 2, RenderUtil.color_edit_tile_copy_box);
+            } else if (copy_status == 1)
+            {
+              Text.draw("copying ongoing", 100, 30, Color.FIREBRICK);
+              if (copy_width > 0 && copy_height > 0)
               {
-                RenderUtil.render_box(offx_tile + Config.CONF.EDITOR_TILE_SPACING.value * (i - 1) - 1, offy_tile - 1, 18, 18, Color.GOLD);
+                float px = World.global_offset_x + copy_start_tilex * Chunk.TILE_SIZE;
+                float py = World.global_offset_y + copy_start_tiley * Chunk.TILE_SIZE;
+                RenderUtil.render_outer_box((int) px - 1, (int) py - 1, copy_width * Chunk.TILE_SIZE + 2, copy_height * Chunk.TILE_SIZE + 2, RenderUtil.color_edit_tile_copy_box);
               }
-              Main.batch.draw(Res.PLATFORM.sheet[i], offx_tile + Config.CONF.EDITOR_TILE_SPACING.value * (i - 1), offy_tile);
+            } else if (copy_status == 2)
+            {
+              Text.draw("copied " + copy_width + "|" + copy_height, 100, 30, Color.FIREBRICK);
+              if (copy_width > 0 && copy_height > 0)
+              {
+                for (int ix = 0; ix <= copy_width; ix++)
+                {
+                  for (int iy = 0; iy <= copy_height; iy++)
+                  {
+                    Tile tile = Tile.safe_ord(copied_tile_data.get(ix, iy));
+                    float px = World.global_offset_x + (edit_tilex - copy_width) * Chunk.TILE_SIZE + ix * Chunk.TILE_SIZE;
+                    float py = World.global_offset_y + (edit_tiley - copy_height) * Chunk.TILE_SIZE + iy * Chunk.TILE_SIZE;
+                    Main.batch.setColor(1f, 1f, 1f, 0.5f);
+                    Main.batch.draw(Res.PLATFORM.sheet[tile.ordinal()], px, py);
+                  }
+                }
+              }
             }
           }
           break;
 
           case 0: // TILE MODE
           {
+            // technically is drawn over the edit ui but does not matter
+            float px = World.global_offset_x + edit_tilex * Chunk.TILE_SIZE;
+            float py = World.global_offset_y + edit_tiley * Chunk.TILE_SIZE;
+            RenderUtil.render_box(px - 1, py - 1, Chunk.TILE_SIZE + 2, Chunk.TILE_SIZE + 2, RenderUtil.color_edit_tile);
+
             int offx_tile = Config.CONF.EDITOR_TILE_OFFX.value;
             int offy_tile = Config.CONF.EDITOR_TILE_OFFY.value;
             for (int i = 1; i < Tile.values().length; i++)
@@ -726,6 +803,7 @@ public class World
             Tile tile = Tile.safe_ord(edit_tile_ordinal);
             Text.draw("current tile: ", 100, 50, Color.LIGHT_GRAY);
             Text.draw(tile.name(), 160, 50, Color.GOLD);
+
 
           }
           break;
@@ -753,7 +831,7 @@ public class World
         {
           if (sm_stars.get(i, 0) != -1)
           {
-            TextureRegion reg = Star.get_region(sm_stars.get(i,0), sm_stars.get(i, 3));
+            TextureRegion reg = Star.get_region(sm_stars.get(i, 0), sm_stars.get(i, 3));
             float parallax = player.posy / (sm_stars.get(i, 0) + 10);
             Main.batch.draw(reg, sm_stars.get(i, 1), sm_stars.get(i, 2) - (parallax));
           }
@@ -799,10 +877,41 @@ public class World
 
         float wall_x = World.global_offset_x + (Chunk.CHUNK_SIZE / 2f * Chunk.TILE_SIZE * wall_progress);
         float wall_y = World.global_offset_y + 0;
-        RenderUtil.render_box(wall_x - wall_width, wall_y, (int) wall_width, Chunk.CHUNK_SIZE * Chunk.TILE_SIZE, Color.DARK_GRAY);
+
+        for (int i = 0; i < Config.CONF.WALL_VERTICAL_NUMBER.value; i++)
+        {
+          for (int iy = 0; iy < 4; iy++)
+          {
+            for (int ix = 0; ix < 7; ix++)
+            {
+              Main.batch.draw(Res.WALL_BLOCK.region, wall_x - 32 * ix - 32 - 16, wall_y + (i * Res.WALL_EDGE.region.getRegionHeight()) + iy * 32);
+            }
+          }
+
+          Main.batch.draw(Res.WALL_EDGE.region, wall_x - Res.WALL_EDGE.region.getRegionWidth(), wall_y + (i * Res.WALL_EDGE.region.getRegionHeight()));
+        }
+
 
         wall_x = World.global_offset_x + (Chunk.CHUNK_SIZE * Chunk.TILE_SIZE) - (Chunk.CHUNK_SIZE / 2f * Chunk.TILE_SIZE * wall_progress);
-        RenderUtil.render_box(wall_x, wall_y, (int) wall_width, Chunk.CHUNK_SIZE * Chunk.TILE_SIZE, Color.DARK_GRAY);
+
+        //RenderUtil.render_box(wall_x, wall_y, (int) wall_width, Chunk.CHUNK_SIZE * Chunk.TILE_SIZE, Color.DARK_GRAY);
+
+        for (int i = 0; i < Config.CONF.WALL_VERTICAL_NUMBER.value; i++)
+        {
+          for (int iy = 0; iy < 4; iy++)
+          {
+            for (int ix = 0; ix < 7; ix++)
+            {
+              Main.batch.draw(Res.WALL_BLOCK.region, wall_x + 32 * ix + 16, wall_y + (i * Res.WALL_EDGE.region.getRegionHeight()) + iy * 32);
+            }
+          }
+
+          Main.batch.draw(Res.WALL_EDGE.region, wall_x, wall_y + (i * Res.WALL_EDGE.region.getRegionHeight()));
+        }
+
+        for (int i = 0; i < Config.CONF.WALL_VERTICAL_NUMBER.value; i++)
+        {
+        }
 
         //for (int i = 1; i <= 3; i++)
         //{
@@ -880,6 +989,39 @@ public class World
       }
       FileHandle chunk_file = Gdx.files.local("levels/" + level_name + "/" + Chunk.chunk_coordinate_to_savename(c.cx) + "_" + Chunk.chunk_coordinate_to_savename(c.cy) + ".json");
       chunk_file.writeString(json.toJson(c), false);
+    }
+  }
+
+  public static int get_global_chunk_tile(int tilex, int tiley)
+  {
+    // convert from global pos to local chunk pos and get the data
+    // used by copy paste code
+
+    int chunkx = (int) (tilex / ((float) Chunk.CHUNK_SIZE));
+    int chunky = (int) (tiley / ((float) Chunk.CHUNK_SIZE));
+    Chunk c = get_chunk(chunkx, chunky);
+    if (c != null)
+    {
+      int local_tilex = tilex % Chunk.CHUNK_SIZE;
+      int local_tiley = tiley % Chunk.CHUNK_SIZE;
+      return c.tiles.get(local_tilex, local_tiley);
+    }
+    return -1;
+  }
+
+  public static void set_global_chunk_tile(int tilex, int tiley, int value)
+  {
+    // convert from global pos to local chunk pos and get the data
+    // used by copy paste code
+
+    int chunkx = (int) (tilex / ((float) Chunk.CHUNK_SIZE));
+    int chunky = (int) (tiley / ((float) Chunk.CHUNK_SIZE));
+    Chunk c = get_chunk(chunkx, chunky);
+    if (c != null)
+    {
+      int local_tilex = tilex % Chunk.CHUNK_SIZE;
+      int local_tiley = tiley % Chunk.CHUNK_SIZE;
+      c.tiles.set(local_tilex, local_tiley, (byte) value);
     }
   }
 

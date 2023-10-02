@@ -21,6 +21,7 @@ public class RenderUtil
    public final static Color collect_box_shadow = Color.DARK_GRAY.cpy();
 
    public final static Color color_edit_tile = Color.SCARLET.cpy();
+   public final static Color color_edit_tile_copy_box = Color.GOLD.cpy();
 
    static
    {
@@ -62,12 +63,24 @@ public class RenderUtil
       Main.batch.setColor(Color.WHITE);
    }
 
+   public static void render_outer_box(int x, int y, int width, int height, Color color)
+   {
+      Main.batch.setColor(color);
+      Main.batch.draw(Res.pixel, x, y, width, 1);
+      Main.batch.draw(Res.pixel, x, y + height - 1, width, 1);
+      Main.batch.draw(Res.pixel, x + width - 1, y + 1, 1, height - 2);
+      Main.batch.draw(Res.pixel, x, y + 1, 1, height - 2);
+      Main.batch.setColor(Color.WHITE);
+   }
+
    public static void render_box(float posx, float posy, int width, int height, Color color)
    {
       Main.batch.setColor(color);
       Main.batch.draw(Res.pixel, posx, posy, width, height);
       Main.batch.setColor(Color.WHITE);
    }
+
+
 
    public static void render_bar(int posx, int posy, int width, int height, Color cempty, Color cfull, float fill)
    {

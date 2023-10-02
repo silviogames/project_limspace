@@ -232,10 +232,7 @@ public class Flatbyte implements Json.Serializable
 	public void reset()
 	{
 		// set all values to the default value
-		for (int i = 0; i < values.length; i++)
-		{
-			values[i] = default_value;
-		}
+		Arrays.fill(values, default_value);
 	}
 
 	public byte dump(int index)

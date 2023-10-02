@@ -5,6 +5,10 @@ import com.badlogic.gdx.utils.IntIntMap;
 public enum Tile
 {
   AIR(0),
+
+  FLOOR_UPPER(1),
+  FLOOR_INNER(1),
+
   DUE_1(2),
   DUE_2(2),
 

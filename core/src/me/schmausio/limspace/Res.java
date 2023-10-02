@@ -21,6 +21,10 @@ public enum Res
 
   STARS(11, 7,7),
 
+  WALL_EDGE(),
+
+  WALL_BLOCK(),
+
   //BOX(),
   //BLOCK1(Tile.values().length, 16, 16),
   //PIG(10, 32, 26),

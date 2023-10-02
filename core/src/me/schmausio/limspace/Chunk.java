@@ -113,22 +113,13 @@ public class Chunk implements Json.Serializable
         float px = World.global_offset_x + ix * TILE_SIZE + cx * CHUNK_SIZE * TILE_SIZE;
         float py = World.global_offset_y + iy * TILE_SIZE + cy * CHUNK_SIZE * TILE_SIZE;
 
-        // TODO: 01.10.23 at some points the walls are other tiles than the floor
-        Main.batch.setColor(0.4f,0.4f,0.4f, 1f);
-        Main.batch.draw(Res.PLATFORM.sheet[walls.get(ix, iy)], px, py);
+        // Walls not needed in this project
+        //Main.batch.setColor(0.4f,0.4f,0.4f, 1f);
+        //Main.batch.draw(Res.PLATFORM.sheet[walls.get(ix, iy)], px, py);
 
         Main.batch.setColor(Color.WHITE);
         Main.batch.draw(Res.PLATFORM.sheet[tiles.get(ix, iy)], px, py);
 
-        if (World.status == World.WorldStatus.EDIT_CHUNKS)
-        {
-          int global_tilex = CHUNK_SIZE * cx + ix;
-          int global_tiley = CHUNK_SIZE * cy + iy;
-          if (World.edit_tilex == global_tilex && World.edit_tiley == global_tiley)
-          {
-            RenderUtil.render_box(px - 1, py - 1, TILE_SIZE + 2, TILE_SIZE + 2, RenderUtil.color_edit_tile);
-          }
-        }
       }
     }
 
