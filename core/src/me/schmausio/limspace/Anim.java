@@ -26,7 +26,7 @@ public enum Anim
   //ROCKET(2, 0.2f, -1, false, 0, 1),
   ROCKET_FIRE(2, 0.1f, -1, false, 0, 1),
 
-  SMOKE(7, 0.5f, -1, false, 0, 1, 2, 3, 4, 5, 6),
+  SMOKE(7, 0.2f, -1, false, 0, 1, 2, 3, 4, 5, 6),
 
   ;
   public static float[] returner = new float[3];

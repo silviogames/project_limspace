@@ -215,6 +215,7 @@ public class World
         {
           if (!Main.RELEASE) chunk_dir.mkdirs();
         }
+        System.out.println("loaded level " + list_levels[level_index]);
       }
       break;
       case EDIT_CHUNKS:
@@ -393,7 +394,7 @@ public class World
 
       case PAUSE:
       {
-        if (Main.DEBUG && Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
         {
           init_status(WorldStatus.PLAY);
         }
@@ -775,7 +776,7 @@ public class World
           return;
         }
 
-        if (Main.DEBUG && Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
         {
           init_status(WorldStatus.PAUSE);
           return;
@@ -1100,6 +1101,13 @@ public class World
           ent.render();
         }
 
+        if (status == WorldStatus.ROCKET_FLY)
+        {
+          Main.batch.setColor(Color.DARK_GRAY);
+        } else
+        {
+          Main.batch.setColor(Color.WHITE);
+        }
         float wall_x = World.global_offset_x + (Chunk.CHUNK_SIZE / 2f * Chunk.TILE_SIZE * wall_progress);
         float wall_y = World.global_offset_y + 0;
 
@@ -1130,9 +1138,10 @@ public class World
               Main.batch.draw(Res.WALL_BLOCK.region, wall_x + 32 * ix + 16, wall_y + (i * Res.WALL_EDGE.region.getRegionHeight()) + iy * 32);
             }
           }
-
           Main.batch.draw(Res.WALL_EDGE.region, wall_x, wall_y + (i * Res.WALL_EDGE.region.getRegionHeight()));
         }
+
+        Main.batch.setColor(Color.WHITE);
 
         // OLD UI ELEMENTS (HEALTH, BOXCOUNT)
         //for (int i = 1; i <= 3; i++)
