@@ -49,6 +49,13 @@ public class Chunk implements Json.Serializable
             World.list_spawn.add(entity);
           }
           break;
+          case SIGN:
+          {
+            Entity entity = new Entity(px, py, Entity.EntityType.SIGN);
+            entity.origin_chunk = combined_pos;
+            World.list_spawn.add(entity);
+          }
+          break;
         }
       }
     }
@@ -120,7 +127,7 @@ public class Chunk implements Json.Serializable
         Main.batch.setColor(Color.WHITE);
         Main.batch.draw(Res.PLATFORM.sheet[tiles.get(ix, iy)], px, py);
 
-        if(World.status == World.WorldStatus.EDIT_CHUNKS)
+        if (World.status == World.WorldStatus.EDIT_CHUNKS)
         {
           Chunk_Object co = Chunk_Object.safe_ord(objects.get(ix, iy));
           if (co != Chunk_Object.NONE)
@@ -242,6 +249,8 @@ public class Chunk implements Json.Serializable
     // objects encoded in G value of a pixel in the chunk image
     NONE,
     ROCKET,
+
+    SIGN,
     ;
 
     public static Chunk_Object safe_ord(int ordinal)
@@ -262,6 +271,9 @@ public class Chunk implements Json.Serializable
       {
         case ROCKET:
           ret = Res.ROCKET_CAT.sheet[0];
+          break;
+        case SIGN:
+          ret = Res.SIGN.region;
           break;
       }
       return ret;

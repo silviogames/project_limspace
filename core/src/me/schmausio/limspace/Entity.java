@@ -37,6 +37,8 @@ public class Entity
   static int wutz_life = 3;
   static float time_blink = 0f;
 
+  public static float cat_wait = 0f;
+
   static float check_point_x = Chunk.TILE_SIZE * 10;
   static float check_point_y = Chunk.TILE_SIZE * 30;
 
@@ -438,6 +440,17 @@ public class Entity
       float[] ret = anim.update(anim_time, delta);
       anim_time = ret[0];
     }
+
+    if (type == EntityType.PLAYER)
+    {
+      if (vx == 0 && vy == 0)
+      {
+        cat_wait += delta;
+      } else
+      {
+        cat_wait = 0f;
+      }
+    }
   }
 
   public void render()
@@ -445,7 +458,7 @@ public class Entity
     float px = World.global_offset_x + posx;
     float py = World.global_offset_y + posy;
 
-    if(dead ) return;
+    if (dead) return;
 
     switch (type)
     {
@@ -461,8 +474,17 @@ public class Entity
       }
       break;
       case ROCKET:
+      {
         Main.batch.draw(Res.ROCKET_CAT.sheet[0], px - Res.ROCKET_CAT.sheet[0].getRegionWidth() / 2f, py);
-        break;
+      }
+      break;
+
+      case SIGN:
+      {
+        Main.batch.draw(Res.SIGN.region, px - Res.SIGN.region.getRegionWidth() / 2f, py);
+      }
+      break;
+
       //case ENEMY_MUSHROOM:
       //{
       //   TextureRegion reg = Res.get_frame(anim_time, anim, flip);
@@ -486,6 +508,9 @@ public class Entity
     PLAYER(true, false, false),
 
     ROCKET(false, false, true),
+
+    SIGN(false, false, true),
+
 
     ;
 
@@ -519,8 +544,12 @@ public class Entity
       switch (this)
       {
         case PLAYER:
-          // TODO: 30.09.23 fix
-          ret = right ? Anim.CAT_IDLE_RIGHT : Anim.CAT_IDLE_LEFT;
+          if(cat_wait > Config.CONF.TIME_SIT.value){
+            ret = right ? Anim.CAT_SCHLECK_RIGHT : Anim.CAT_SCHLECK_LEFT;
+          }else
+          {
+            ret = right ? Anim.CAT_IDLE_RIGHT : Anim.CAT_IDLE_LEFT;
+          }
           break;
       }
       return ret;

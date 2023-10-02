@@ -132,6 +132,8 @@ public class World
   public static int rocket_start_x, rocket_start_y;
   public static float rocket_progress = 0f;
 
+  public static float fire_anim_progress = 0f;
+
   static
   {
     gameover_pause_back.a = 0.5f;
@@ -364,6 +366,10 @@ public class World
             }
           }
         }
+
+        float[] ret_val = Anim.ROCKET_FIRE.update(fire_anim_progress, delta);
+        fire_anim_progress = ret_val[0];
+
       }
       break;
 
@@ -1042,6 +1048,9 @@ public class World
 
           Text.draw("num. entities " + list_entities.size, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
           debug_off += 10;
+
+          Text.draw("cat wait " + Entity.cat_wait, 2, Main.SCREEN_HEIGHT - debug_off, debug_text_color);
+          debug_off += 10;
         }
 
         global_offset_x = -player.posx + Main.SCREEN_WIDTH / 2f + camera_offset_x;
@@ -1152,6 +1161,8 @@ public class World
 
           float rocket_lerped_x = MathUtils.lerp(rocket_start_x, rocket_start_x + 30, Interpolation.smooth.apply(rocket_progress));
           float rocket_lerped_y = MathUtils.lerp(rocket_start_y, rocket_start_y + 250, Interpolation.smooth.apply(rocket_progress));
+
+          Main.batch.draw(Res.ROCKET_FIRE.sheet[Anim.ROCKET_FIRE.get_frame(fire_anim_progress)], rocket_lerped_x - Res.ROCKET_FIRE.sheet[0].getRegionWidth() / 2f, rocket_lerped_y - Config.CONF.ROCKET_FIRE_YOFF.value);
           Main.batch.draw(Res.ROCKET_CAT.sheet[1], rocket_lerped_x - Res.ROCKET_CAT.sheet[1].getRegionWidth() / 2f, rocket_lerped_y);
         }
       }
