@@ -39,7 +39,7 @@ public class Main extends ApplicationAdapter
 
 		Config.load_config(true);
 
-		World.level_name = "schmausel";
+		World.level_name = "level_tres";
 		World.init_status(World.WorldStatus.LOAD_LEVEL);
   }
 
