@@ -108,9 +108,12 @@ public class World
   public static float wall_progress = 0f;
   public static float wall_width = 300;
 
+  public static Color gameover_pause_back = Color.BLACK.cpy();
+  
   // GAMEOVER DATA:
 
   public static float gameover_opacity = 0f;
+  
 
   public static Color gameover_color_back = Color.BLACK.cpy();
   public static Color gameover_color_text = Color.BLACK.cpy();
@@ -157,6 +160,7 @@ public class World
         list_entity_index_remove.clear();
 
         list_entities.add(player);
+        Entity.hide_player = false;
 
         // this might be entered after finished another level so I need to clean up
         list_chunks.clear();
@@ -306,6 +310,15 @@ public class World
 
     switch (status)
     {
+      case PAUSE:
+      {
+        if (Main.DEBUG && Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
+        {
+          init_status(WorldStatus.PLAY);
+        }
+      }
+      break;
+
       case EDIT_CHUNKS: // MAP EDITOR
       {
         global_offset_x = -editor_x + Main.SCREEN_WIDTH / 2f + camera_offset_x;
@@ -916,6 +929,7 @@ public class World
       break;
       case PLAY: // RENDER
       case GAMEOVER:
+      case PAUSE:
       {
         Main.batch.draw(Res.BACKGROUND.sheet[1], 0, 0);
         Main.batch.draw(Res.BACKGROUND.sheet[0], 0, 0);
@@ -1047,8 +1061,11 @@ public class World
 
           Text.cdraw("GAME OVER", Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT / 2, gameover_color_text, 2f);
           Text.cdraw("press [space] to restart", Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT / 2 - 20, gameover_color_text);
+        }else if (status == WorldStatus.PAUSE){
+          RenderUtil.render_box(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT, gameover_pause_back);
+          // TODO: 02.10.23 fix 
+          
         }
-
       }
       break;
       case LOAD_LEVEL:

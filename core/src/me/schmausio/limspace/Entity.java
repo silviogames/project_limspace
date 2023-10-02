@@ -42,6 +42,9 @@ public class Entity
 
   float despawn_time = 0f;
 
+  // used during rocket animation
+  public static boolean hide_player = false;
+
   // postbox
   static String message = "";
   static float time_message = 0f;
@@ -77,6 +80,7 @@ public class Entity
   public void update(float delta, int index)
   {
     if (dead) return;
+    if(type == EntityType.PLAYER && hide_player) return;
 
     switch (type)
     {
@@ -84,8 +88,17 @@ public class Entity
       {
         if (AI_check)
         {
-          if (Util.simple_dist(posx, posy, World.end_x, World.end_y) < 20 * 20)
+          for (int i = 0; i < World.list_entities.size; i++)
           {
+            Entity ent = World.list_entities.get(i);
+            if (ent.type == EntityType.ROCKET)
+            {
+              if (Util.simple_dist(posx, posy, ent.posx, ent.posy + 10) < 20 * 20)
+              {
+                System.out.println("touched rocket");
+                hide_player = true;
+              }
+            }
           }
 
         }
@@ -426,6 +439,7 @@ public class Entity
     {
       case PLAYER:
       {
+        if(hide_player) break;
         boolean blink = time_blink > 0f && MathUtils.floor(time_blink / 0.07f) % 2 == 0;
         Main.batch.setColor(blink ? RenderUtil.color_blink : Color.WHITE);
         TextureRegion reg = Res.get_frame(anim_time, anim, false);
