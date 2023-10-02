@@ -297,6 +297,7 @@ public class World
 
         if (Main.DEBUG && Gdx.input.isKeyJustPressed(Input.Keys.F1))
         {
+          save_chunks();
           init_status(WorldStatus.PLAY);
           return;
         }
@@ -437,7 +438,10 @@ public class World
                     for (int iy = copy_start_tiley; iy <= copy_end_tiley; iy++)
                     {
                       int local_tile = World.get_global_chunk_tile(ix, iy);
-                      copied_tile_data.set(offx, offy, (byte) local_tile);
+                      if( local_tile > 0)
+                      {
+                        copied_tile_data.set(offx, offy, (byte) local_tile);
+                      }
                       offy++;
                     }
                     offy = 0;
