@@ -49,11 +49,11 @@ public class Smartrix
 
   public void clear_line(int line)
   {
-   // // OLD: clearing the whole line to prevent
-   // for (int i = 0; i < width; i++)
-   // {
-   //   set(line, i, clear_value);
-   // }
+    // // OLD: clearing the whole line to prevent
+    // for (int i = 0; i < width; i++)
+    // {
+    //   set(line, i, clear_value);
+    // }
 
     // here I only set the first value in the line to the clear line,
     // that first value is used when reusing a cleared line (although they should all be in the
@@ -206,6 +206,8 @@ public class Smartrix
 
   public void clear()
   {
+    // list empty is not valid anymore!
+    list_empty.clear();
     data.clear();
   }
 

@@ -30,6 +30,8 @@ public enum Res
   ROCKET_FIRE(2, 22,22),
 
   PLANETS(2, 256,172),
+
+  SMOKE(7, 10, 10),
   ;
 
   static final Array<Anim> load_queue = new Array<>();
@@ -94,8 +96,9 @@ public enum Res
     load_anims(STARS, 0);
     load_queue.clear();
 
-    load_queue.add(Anim.ROCKET);
-    load_anims(ROCKET_CAT, 0);
+
+    load_queue.add(Anim.SMOKE);
+    load_anims(SMOKE, 0);
     load_queue.clear();
 
       /*

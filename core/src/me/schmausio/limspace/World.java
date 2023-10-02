@@ -32,6 +32,14 @@ public class World
   // 2 -> y position
   // 3 -> anim time
 
+  static Smartrix sm_smoke = new Smartrix(6, -1, -1);
+  // SMOKE:
+  // 0 -> type ( always 0)
+  // 1 -> x position
+  // 2 -> y position
+  // 3 -> anim time
+  // 4 -> y off
+  // 5 -> random blackness
 
   static int delete_chunk_index = -1;
   static int delete_chunk_counter = 0;
@@ -169,6 +177,7 @@ public class World
         Entity.hide_player = false;
 
         rocket_progress = 0f;
+        sm_smoke.clear_all_lines();
 
         // this might be entered after finished another level so I need to clean up
         list_chunks.clear();
@@ -325,6 +334,35 @@ public class World
         {
           init_status(WorldStatus.LOAD_LEVEL);
           return;
+        }
+
+        float rocket_lerped_x = MathUtils.lerp(rocket_start_x, rocket_start_x + 30, Interpolation.smooth.apply(rocket_progress));
+        //rocket_lerped_x -= Res.ROCKET_CAT.sheet[1].getRegionWidth() / 2f;
+        float rocket_lerped_y = MathUtils.lerp(rocket_start_y, rocket_start_y + 250, Interpolation.smooth.apply(rocket_progress));
+        for (int i = 0; i < 2; i++)
+        {
+          int sx = (int) (rocket_lerped_x + MathUtils.random(-Config.CONF.ROCKET_SMOKE_OFFSET.value, Config.CONF.ROCKET_SMOKE_OFFSET.value));
+          int sy = (int) (rocket_lerped_y + MathUtils.random(-Config.CONF.ROCKET_SMOKE_OFFSET.value, Config.CONF.ROCKET_SMOKE_OFFSET.value) - 10);
+          sm_smoke.add_line(0, sx, sy, 0, 0,  MathUtils.random(10, 80));
+        }
+
+        for (int i = 0; i < sm_smoke.num_lines(); i++)
+        {
+          if (sm_smoke.get(i, 0) != -1)
+          {
+            float yoff = Util.INT_TO_FLOAT(sm_smoke.get(i, 4));
+            yoff += delta * Config.CONF.ROCKET_SMOKE_FALLSPEED.value;
+            sm_smoke.set(i, 4, Util.FLOAT_TO_INT(yoff));
+
+            float anim_time = Util.INT_TO_FLOAT(sm_smoke.get(i, 3));
+            float[] ret_val = Anim.SMOKE.update(anim_time, delta);
+            sm_smoke.set(i, 3, Util.FLOAT_TO_INT(ret_val[0]));
+            if (ret_val[2] == 1)
+            {
+              // ANIMATION IS OVER
+              sm_smoke.clear_line(i);
+            }
+          }
         }
       }
       break;
@@ -1092,6 +1130,26 @@ public class World
           Text.cdraw("press [escape] to play", Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT / 2 - 20, Color.GOLD);
         } else if (status == WorldStatus.ROCKET_FLY)
         {
+          for (int i = 0; i < sm_smoke.num_lines(); i++)
+          {
+            if (sm_smoke.get(i, 0) != -1)
+            {
+              float anim_time = Util.INT_TO_FLOAT(sm_smoke.get(i, 3));
+              int frame = Anim.SMOKE.get_frame(anim_time);
+              TextureRegion reg = Res.get_frame(anim_time, Anim.SMOKE);
+
+              float yoff = Util.INT_TO_FLOAT(sm_smoke.get(i, 4));
+              int sx = sm_smoke.get(i, 1);
+              int sy = sm_smoke.get(i, 2);
+
+              int blackness = sm_smoke.get(i, 5);
+              float bv = blackness / 100f;
+              Main.batch.setColor(bv, bv, bv, 0.5f);
+              Main.batch.draw(reg, sx - Res.SMOKE.sheet[0].getRegionWidth() / 2f, sy - yoff);
+              Main.batch.setColor(Color.WHITE);
+            }
+          }
+
           float rocket_lerped_x = MathUtils.lerp(rocket_start_x, rocket_start_x + 30, Interpolation.smooth.apply(rocket_progress));
           float rocket_lerped_y = MathUtils.lerp(rocket_start_y, rocket_start_y + 250, Interpolation.smooth.apply(rocket_progress));
           Main.batch.draw(Res.ROCKET_CAT.sheet[1], rocket_lerped_x - Res.ROCKET_CAT.sheet[1].getRegionWidth() / 2f, rocket_lerped_y);

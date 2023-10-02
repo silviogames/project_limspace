@@ -14,12 +14,14 @@ bounds:2,546,513,172
 platform
 bounds:2,492,288,16
 rocket_cat
-bounds:2,458,45,32
+bounds:805,922,45,32
 rocket_fire
-bounds:805,932,45,22
+bounds:535,696,45,22
+smoke
+bounds:2,480,76,10
 stars
 bounds:935,1013,87,7
 wall_block
-bounds:535,686,32,32
+bounds:935,979,32,32
 wall_edge
 bounds:517,590,16,128
