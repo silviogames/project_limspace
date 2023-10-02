@@ -1,6 +1,7 @@
 package me.schmausio.limspace;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
@@ -45,9 +46,12 @@ public enum Res
   TextureRegion region;
   TextureRegion[] sheet;
 
+  static Music song;
+
   Res()
   {
     // empty constructor
+
 
   }
 
