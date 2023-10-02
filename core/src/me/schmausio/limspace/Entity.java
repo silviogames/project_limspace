@@ -268,91 +268,6 @@ public class Entity
       }
       break;
 
-      //case ENEMY_FLOWER:
-      //{
-      //   if (AI_check)
-      //   {
-      //      if (Util.simple_dist(posx, posy, World.player.posx, World.player.posy) < 150 * 150)
-      //      {
-      //         anim = type.anim_run(this);
-      //         int dir = (int) Math.signum(World.player.posx - posx);
-      //         vx = dir;
-      //      } else
-      //      {
-      //         if (Util.simple_dist(posx, posy, World.player.posx, World.player.posy) > 200 * 200)
-      //         {
-      //            vx = 0;
-      //            anim = type.anim_idle(this);
-      //         }
-      //      }
-
-      //   }
-
-      //   if (!falling)
-      //   {
-      //      if (!World.collision(posx, posy - 4))
-      //      {
-      //         falling = true;
-      //      }
-      //   }
-
-      //   // every frame!
-      //   if (Util.simple_dist(posx, posy, World.player.posx, World.player.posy) < Config.CONF//.PIG_HIT_RADIUS.value)
-      //   {
-      //      if (time_blink == 0f)
-      //      {
-      //         wutz_life--;
-      //         if (wutz_life <= 0)
-      //         {
-      //            if (!pack)
-      //            {
-      //               for (int i = 0; i < World.list_entities.size; i++)
-      //               {
-      //                  if (World.list_entities.get(i).type == EntityType.BOX)
-      //                  {
-      //                     World.list_entity_index_remove.add(i);
-      //                     World.list_entities.get(i).dead = true;
-      //                     break;
-      //                  }
-      //               }
-      //               pack = true;
-      //            }
-      //
-      //            World.player.posx = check_point_x;
-      //            World.player.posy = check_point_y;
-      //            display_message("try again!", (int) check_point_x, (int) check_point_y);
-      //            wutz_life = 3;
-      //            time_blink = 0f;
-      //         } else
-      //         {
-      //            time_blink = 0.01f;
-      //         }
-      //      }
-      //   }
-      //}
-      //break;
-
-      // case PARTICLE_FLOWER:
-      // {
-      //    anim = Anim.PARTICLE_FLOWER;
-
-      //    if (vx != 0)
-      //    {
-      //       vx = MathUtils.lerp(vx, 0, falling ? 0.01f : 0.5f);
-      //       if (Math.abs(vx) < 0.001f) vx = 0;
-      //    }
-
-      //    if (vx == 0 && vy == 0)
-      //    {
-      //       despawn_time += delta;
-      //       if (despawn_time >= 1f)
-      //       {
-      //          dead = true;
-      //          World.list_entity_index_remove.add(index);
-      //       }
-      //    }
-      // }
-      // break;
     }
 
     if (type.gravity_affected)
@@ -389,7 +304,7 @@ public class Entity
 
       boolean collision_vert2 = World.collision(nx, ny, vy);
 
-      int num_pixels_per_move = MathUtils.floor(Math.abs(posy - ny));
+      int num_pixels_per_move = MathUtils.ceil(Math.abs(posy - ny));
 
       if (num_pixels_per_move > 1)
       {

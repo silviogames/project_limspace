@@ -732,6 +732,9 @@ public class World
 
       case PLAY: // GAME LOOP
       {
+        if(Main.DEBUG) {
+          delta = delta;
+        }
         wall_progress += delta * (1 / (float) Config.CONF.WALL_SPEED.value);
 
         for (int i = 0; i < sm_stars.num_lines(); i++)
