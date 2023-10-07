@@ -788,7 +788,6 @@ public class World
           return;
         }
 
-
         for (int i = 0; i < list_entities.size; i++)
         {
           Entity ent = list_entities.get(i);
@@ -1027,6 +1026,7 @@ public class World
 
       }
       break;
+
       case PLAY: // RENDER
       case GAMEOVER:
       case PAUSE:
@@ -1213,7 +1213,10 @@ public class World
       break;
       case LOAD_LEVEL:
       {
-        Text.cdraw("loading chunks " + list_chunk_files.size, Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT / 2, Color.WHITE, 2f);
+        Main.batch.draw(Res.BACKGROUND.sheet[1], 0, 0);
+        Main.batch.draw(Res.BACKGROUND.sheet[0], 0, 0);
+
+        //Text.cdraw("loading chunks " + list_chunk_files.size, Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT / 2, Color.WHITE, 2f);
       }
       break;
     }

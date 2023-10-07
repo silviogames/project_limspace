@@ -1,6 +1,1 @@
-create the levels
-
-load levels in order after finishing another
-
-fix collision, sometimes you fall through platforms
-
+platform disappears during rocket fly

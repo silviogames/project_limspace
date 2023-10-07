@@ -42,7 +42,7 @@ public class Main extends ApplicationAdapter
     World.level_index = 0;
     World.init_status(World.WorldStatus.LOAD_LEVEL);
 
-    Res.song = Gdx.audio.newMusic(Gdx.files.internal("LD54.mp3"));
+    Res.song = Gdx.audio.newMusic(Gdx.files.internal("ld54.mp3"));
     Res.song.setLooping(true);
     Res.song.play();
     Res.song.setVolume(0.5f);
